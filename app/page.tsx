@@ -1,55 +1,142 @@
-import Image from "next/image";
-import { Shell } from "@/components/layout/Shell";
-import { StatCard } from "@/components/cards/StatCard";
-import { UserTable, UserRow } from "@/components/table/UserTable";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
+import { Database } from "@/types/supabase";
+import { UserRow } from "@/components/table/UserTable";
+import { DashboardClient } from "./DashboardClient";
+import { subDays } from "date-fns";
 
-export default function Home() {
-  const rows: UserRow[] = [
-    { id: "#100000A", name: "Alex John", email: "alexjohn19@gmail.com", lastActive: new Date(Date.now() - 2 * 60 * 1000), bottles: 23, type: "Basic" },
-    { id: "#100000B", name: "Mary James", email: "maryjames91@gmail.com", lastActive: new Date(Date.now() - 12 * 60 * 1000), bottles: 10, type: "Premium" },
-    { id: "#100000C", name: "Tom Hardy", email: "tomhardy22@gmail.com", lastActive: new Date(Date.now() - 60 * 60 * 1000), bottles: 18, type: "Basic" },
-  ];
-  return (
-    <Shell title="Dashboard">
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard title="Total Users" value="4,800" trendIcon="/assets/figma/trending-up.svg" trendText="+2% (compared to last month)" />
-              <StatCard title="Active Users" value="805" trendIcon="/assets/figma/trending-down.svg" trendText="-1% (compared to last month)" />
-              <StatCard title="Bottles Sent" value="5,108" trendIcon="/assets/figma/trending-up.svg" trendText="+9% (compared to last month)" />
-              <StatCard title="Premium Users" value="200" trendIcon="/assets/figma/trending-down.svg" trendText="-3% (compared to last month)" />
-      </section>
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-      <section className="mt-6">
-        <div className="flex items-center justify-between">
-                <h2 className="text-[24px] font-semibold text-[#363636]">Users</h2>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-[320px] items-center gap-2 rounded-lg border border-[#d9d9d9] px-3">
-                    <Image src="/assets/figma/search-2.svg" alt="search" width={24} height={24} />
-                    <Input className="h-10 border-0 p-0 text-[#363636]" placeholder="Search for users" />
-                  </div>
-                  <Button variant="secondary" className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]">
-                    <Image src="/assets/figma/filter.svg" alt="filter" width={20} height={20} />
-                    Filter
-                  </Button>
-                </div>
-        </div>
+export default async function Home() {
+  const now = new Date();
+  const thirtyDaysAgo = subDays(now, 30).toISOString();
+  const sixtyDaysAgo = subDays(now, 60).toISOString();
 
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex gap-6">
-            <span className="text-[16px] font-medium text-[#363636]">From: Jan 12, 2025</span>
-            <span className="text-[16px] font-medium text-[#363636]">To: Feb 12, 2025</span>
-          </div>
-          <button className="inline-flex items-center gap-2 rounded-lg bg-[#363636] px-4 py-3 text-white">
-            <Image src="/assets/figma/share.svg" alt="share" width={20} height={20} />
-            Export
-          </button>
-        </div>
+  const [
+    { count: totalUsers },
+    { count: totalUsersPrev },
+    { count: activeUsers },
+    { count: activeUsersPrev },
+    { count: bottlesSent },
+    { count: bottlesSentPrev },
+    { count: premiumUsers },
+    { count: premiumUsersPrev },
+    { data: usersData },
+    { data: sentBottlesData },
+  ] = await Promise.all([
+    // Current totals/active
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .lt("created_at", thirtyDaysAgo),
 
-        <div className="mt-4">
-          <UserTable rows={rows} />
-        </div>
-      </section>
-    </Shell>
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true)
+      .lt("created_at", thirtyDaysAgo),
+
+    supabase.from("sent_bottles").select("*", { count: "exact", head: true }),
+    supabase
+      .from("sent_bottles")
+      .select("*", { count: "exact", head: true })
+      .lt("created_at", thirtyDaysAgo),
+
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .in("tier", ["premium", "elite"]),
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .in("tier", ["premium", "elite"])
+      .lt("created_at", thirtyDaysAgo),
+
+    supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    supabase.from("sent_bottles").select("sender_id"),
+  ]);
+
+  const allSentBottles =
+    (sentBottlesData as { sender_id: string }[] | null) || [];
+  const bottleCounts = allSentBottles.reduce(
+    (acc, b) => {
+      acc[b.sender_id] = (acc[b.sender_id] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
   );
+
+  // Debugging log for bottles count
+  const { error: bottlesError } = await supabase
+    .from("sent_bottles")
+    .select("id", { count: "exact", head: true });
+  if (bottlesError) {
+    console.error("Supabase Error (sent_bottles):", bottlesError);
+  }
+
+  // Fallback for bottles count: if sent_bottles table is not accessible, sum from profiles
+  let finalBottles = bottlesSent || 0;
+  if (finalBottles === 0) {
+    const { data: profilesWithBottles } = (await supabase
+      .from("profiles")
+      .select("total_bottles_sent")) as {
+      data: { total_bottles_sent: number | null }[] | null;
+    };
+    finalBottles =
+      profilesWithBottles?.reduce(
+        (acc, p) => acc + (p.total_bottles_sent || 0),
+        0,
+      ) || 0;
+  }
+
+  const calculateTrend = (curr: number | null, prev: number | null) => {
+    const c = curr || 0;
+    const p = prev || 0;
+    if (p === 0) return c > 0 ? 100 : 0;
+    return Math.round(((c - p) / p) * 100);
+  };
+
+  const stats = {
+    total: {
+      value: totalUsers || 0,
+      trend: calculateTrend(totalUsers, totalUsersPrev),
+    },
+    active: {
+      value: activeUsers || 0,
+      trend: calculateTrend(activeUsers, activeUsersPrev),
+    },
+    bottles: {
+      value: finalBottles,
+      trend: calculateTrend(finalBottles, bottlesSentPrev),
+    },
+    premium: {
+      value: premiumUsers || 0,
+      trend: calculateTrend(premiumUsers, premiumUsersPrev),
+    },
+  };
+
+  const profiles = usersData as Profile[] | null;
+
+  const rows: UserRow[] =
+    (usersData as any[])?.map((user) => ({
+      id: user.id.substring(0, 8),
+      name: user.full_name || "Unknown",
+      email: user.email,
+      lastActive: user.last_active ? new Date(user.last_active) : new Date(),
+      // Use manually aggregated count, fallback to profiles column
+      bottles: bottleCounts[user.id] ?? user.total_bottles_sent ?? 0,
+      type: (user.tier === "premium" || user.tier === "elite"
+        ? "Premium"
+        : "Basic") as "Basic" | "Premium",
+    })) || [];
+
+  return <DashboardClient stats={stats} initialUsers={rows} />;
 }
