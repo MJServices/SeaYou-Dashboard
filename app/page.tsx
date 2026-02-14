@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/supabase";
 import { UserRow } from "@/components/table/UserTable";
