@@ -1,0 +1,114 @@
+{
+  "Dashboard": {
+    "title": "Dashboard",
+    "totalUsers": "Total Users",
+    "activeUsers": "Active Users",
+    "bottlesSent": "Bottles Sent",
+    "premiumUsers": "Premium Users",
+    "users": "Users",
+    "searchPlaceholder": "Search for users",
+    "filter": "Filter",
+    "export": "Export",
+    "from": "From",
+    "to": "To",
+    "trendText": "{isUp, select, true {+} other {-}}{trend}% (from last month)"
+  },
+  "Users": {
+    "title": "Users",
+    "searchPlaceholder": "Search for users",
+    "filter": "Filter",
+    "export": "Export",
+    "idNumber": "ID Number",
+    "name": "Name",
+    "emailAddress": "Email Address",
+    "lastActive": "Last Active",
+    "bottlesSent": "Bottles Sent",
+    "type": "Type",
+    "basic": "Basic",
+    "premium": "Premium",
+    "all": "All",
+    "advanced": "Advanced...",
+    "select": "Select"
+  },
+  "Sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "admin": "SeaYou Admin",
+    "close": "Close"
+  },
+  "Header": {
+    "menu": "Menu",
+    "collapse": "Collapse",
+    "searchPlaceholder": "Search for anything"
+  },
+  "Filters": {
+    "title": "Filters",
+    "type": "Type",
+    "allTypes": "All Types",
+    "basic": "Basic",
+    "premium": "Premium",
+    "minBottles": "Min Bottles Sent",
+    "minBottlesPlaceholder": "e.g. 10",
+    "apply": "Apply Filters",
+    "reset": "Reset Filters"
+  },
+  "Profile": {
+    "details": "User Profile Details",
+    "unknown": "Unknown",
+    "blockUser": "Block User",
+    "lookingFor": "What I'm looking for",
+    "fantasy": "Fantasy",
+    "quote": "Quote",
+    "voiceMessage": "Voice Message",
+    "age": "Age",
+    "city": "City",
+    "bottlesReceived": "Bottles Received",
+    "bottlesSent": "Bottles Sent",
+    "sexualOrientation": "Sexual Orientation",
+    "interest": "Interest",
+    "picturesUploaded": "Pictures Uploaded",
+    "noInterests": "No interests listed",
+    "noPictures": "No pictures uploaded yet.",
+    "retry": "Retry",
+    "notFound": "User profile not found.",
+    "loading": "Loading...",
+    "notSpecified": "Not specified",
+    "na": "N/A"
+  },
+  "Export": {
+    "title": "Export Users",
+    "description": "CSV export of filtered users.",
+    "cancel": "Cancel",
+    "confirm": "Export"
+  },
+  "Common": {
+    "unknown": "Unknown",
+    "active": "Active",
+    "inactive": "Inactive",
+    "loading": "Loading...",
+    "error": "Error"
+  },
+  "Shell": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "fantasies": "Fantasies",
+    "naughtyQuestions": "Naughty Questions"
+  },
+  "Fantasies": {
+    "title": "Fantasies",
+    "user": "User",
+    "text": "Text",
+    "status": "Status",
+    "createdAt": "Created At",
+    "notFound": "No fantasies found."
+  },
+  "NaughtyQuestions": {
+    "title": "Naughty Questions",
+    "order": "Order",
+    "category": "Category",
+    "label": "Label",
+    "question": "Question",
+    "status": "Status",
+    "notFound": "No questions found."
+  }
+}

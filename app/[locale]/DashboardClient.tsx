@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { format, subDays } from "date-fns";
 import { FilterSheet } from "@/components/sheets/FilterSheet";
 import { UserProfileSheet } from "@/components/sheets/UserProfileSheet";
+import { useTranslations } from "next-intl";
 
 type DashboardStats = {
   total: { value: number; trend: number };
@@ -79,37 +80,38 @@ export function DashboardClient({ stats, initialUsers }: Props) {
     URL.revokeObjectURL(url);
   }
 
+  const t = useTranslations("Dashboard");
+
   const getTrendProps = (trend: number, value: number) => {
     const isUp = trend >= 0;
-    // If trend is 0 but value > 0, it means we have data now but none before (if trend calc handles it)
     return {
       trendIcon: (isUp
         ? "/assets/figma/trending-up.svg"
         : "/assets/figma/trending-down.svg") as any,
-      trendText: `${isUp ? "+" : ""}${trend}% (compared to last month)`,
+      trendText: t("trendText", { isUp: String(isUp), trend }),
     };
   };
 
   return (
-    <Shell title="Dashboard" onHeaderSearch={setSearchQuery}>
+    <Shell title={t("title")} onHeaderSearch={setSearchQuery}>
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Users"
+          title={t("totalUsers")}
           value={stats.total.value.toLocaleString()}
           {...getTrendProps(stats.total.trend, stats.total.value)}
         />
         <StatCard
-          title="Active Users"
+          title={t("activeUsers")}
           value={stats.active.value.toLocaleString()}
           {...getTrendProps(stats.active.trend, stats.active.value)}
         />
         <StatCard
-          title="Bottles Sent"
+          title={t("bottlesSent")}
           value={stats.bottles.value.toLocaleString()}
           {...getTrendProps(stats.bottles.trend, stats.bottles.value)}
         />
         <StatCard
-          title="Premium Users"
+          title={t("premiumUsers")}
           value={stats.premium.value.toLocaleString()}
           {...getTrendProps(stats.premium.trend, stats.premium.value)}
         />
@@ -117,7 +119,9 @@ export function DashboardClient({ stats, initialUsers }: Props) {
 
       <section className="mt-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-[24px] font-semibold text-[#363636]">Users</h2>
+          <h2 className="text-[24px] font-semibold text-[#363636]">
+            {t("users")}
+          </h2>
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-[320px] items-center gap-2 rounded-lg border border-[#d9d9d9] px-3">
               <Image
@@ -128,7 +132,7 @@ export function DashboardClient({ stats, initialUsers }: Props) {
               />
               <Input
                 className="h-10 border-0 p-0 text-[#363636]"
-                placeholder="Search for users"
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -144,7 +148,7 @@ export function DashboardClient({ stats, initialUsers }: Props) {
                 width={20}
                 height={20}
               />
-              Filter
+              {t("filter")}
             </Button>
           </div>
         </div>
@@ -152,10 +156,10 @@ export function DashboardClient({ stats, initialUsers }: Props) {
         <div className="mt-4 flex items-center justify-between">
           <div className="flex gap-6">
             <span className="text-[16px] font-medium text-[#363636]">
-              From: {fromDate}
+              {t("from")}: {fromDate}
             </span>
             <span className="text-[16px] font-medium text-[#363636]">
-              To: {toDate}
+              {t("to")}: {toDate}
             </span>
           </div>
           <button
@@ -168,7 +172,7 @@ export function DashboardClient({ stats, initialUsers }: Props) {
               width={20}
               height={20}
             />
-            Export
+            {t("export")}
           </button>
         </div>
 

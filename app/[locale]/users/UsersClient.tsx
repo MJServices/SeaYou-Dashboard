@@ -20,6 +20,7 @@ import { useMemo, useState } from "react";
 import { ExportSheet } from "@/components/sheets/ExportSheet";
 import { FilterSheet } from "@/components/sheets/FilterSheet";
 import { UserProfileSheet } from "@/components/sheets/UserProfileSheet";
+import { useTranslations } from "next-intl";
 
 export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   const [query, setQuery] = useState("");
@@ -33,6 +34,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
     null,
   );
+  const t = useTranslations("Users");
 
   const filtered = useMemo(() => {
     return initialUsers.filter((r) => {
@@ -52,12 +54,12 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
 
   function exportCsv() {
     const header = [
-      "ID Number",
-      "Name",
-      "Email Address",
-      "Last Active",
-      "Bottles Sent",
-      "Type",
+      t("idNumber"),
+      t("name"),
+      t("emailAddress"),
+      t("lastActive"),
+      t("bottlesSent"),
+      t("type"),
     ];
     const rows = filtered.map((r) => [
       r.id,
@@ -65,7 +67,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
       r.email,
       r.lastActive.toISOString(),
       String(r.bottles),
-      r.type,
+      r.type === "Basic" ? t("basic") : t("premium"),
     ]);
     const csv = [header, ...rows]
       .map((row) => row.map((cell) => `"${cell}"`).join(","))
@@ -80,7 +82,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   }
 
   return (
-    <Shell title="Users" onHeaderSearch={setQuery}>
+    <Shell title={t("title")} onHeaderSearch={setQuery}>
       <div className="flex items-center justify-between">
         <div className="flex h-11 w-[320px] items-center gap-2 rounded-lg border border-[#d9d9d9] px-3">
           <Image
@@ -91,7 +93,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
           />
           <Input
             className="h-10 border-0 p-0 text-[#363636]"
-            placeholder="Search for users"
+            placeholder={t("searchPlaceholder")}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
@@ -108,21 +110,21 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
                   width={20}
                   height={20}
                 />
-                Filter
+                {t("filter")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[200px]">
               <DropdownMenuItem onClick={() => setType("All")}>
-                Type: All
+                {t("type")}: {t("all")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setType("Basic")}>
-                Type: Basic
+                {t("type")}: {t("basic")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setType("Premium")}>
-                Type: Premium
+                {t("type")}: {t("premium")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setFilterOpen(true)}>
-                Advanced…
+                {t("advanced")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -136,7 +138,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
               width={20}
               height={20}
             />
-            Export
+            {t("export")}
           </Button>
         </div>
       </div>
@@ -144,7 +146,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
         <div className="flex gap-6">
           <Popover>
             <PopoverTrigger className="text-[16px] font-medium text-[#363636]">
-              From: {from ? from.toLocaleDateString() : "Select"}
+              {t("from")}: {from ? from.toLocaleDateString() : t("select")}
             </PopoverTrigger>
             <PopoverContent className="p-0">
               <Calendar mode="single" selected={from} onSelect={setFrom} />
@@ -152,7 +154,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
           </Popover>
           <Popover>
             <PopoverTrigger className="text-[16px] font-medium text-[#363636]">
-              To: {to ? to.toLocaleDateString() : "Select"}
+              {t("to")}: {to ? to.toLocaleDateString() : t("select")}
             </PopoverTrigger>
             <PopoverContent className="p-0">
               <Calendar mode="single" selected={to} onSelect={setTo} />
@@ -169,7 +171,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
             width={20}
             height={20}
           />
-          Export
+          {t("export")}
         </Button>
       </div>
       <div className="mt-4">

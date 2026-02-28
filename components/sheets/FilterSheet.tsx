@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 
 export function FilterSheet({
   open,
@@ -31,36 +32,38 @@ export function FilterSheet({
   bottlesMin: number | undefined;
   setBottlesMin: (n: number | undefined) => void;
 }) {
+  const t = useTranslations("Filters");
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Filters</SheetTitle>
+          <SheetTitle>{t("title")}</SheetTitle>
         </SheetHeader>
         <div className="mt-4 space-y-6">
           <div>
             <label className="block text-[14px] font-semibold text-[#363636] mb-1">
-              Type
+              {t("type")}
             </label>
             <Select value={type} onValueChange={(v) => setType(v as any)}>
               <SelectTrigger className="w-full h-11 rounded-lg border-[#d9d9d9]">
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder={t("allTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">All Types</SelectItem>
-                <SelectItem value="Basic">Basic</SelectItem>
-                <SelectItem value="Premium">Premium</SelectItem>
+                <SelectItem value="All">{t("allTypes")}</SelectItem>
+                <SelectItem value="Basic">{t("basic")}</SelectItem>
+                <SelectItem value="Premium">{t("premium")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
             <label className="block text-[14px] font-semibold text-[#363636] mb-1">
-              Min Bottles Sent
+              {t("minBottles")}
             </label>
             <Input
               type="number"
               className="h-11 rounded-lg border-[#d9d9d9]"
-              placeholder="e.g. 10"
+              placeholder={t("minBottlesPlaceholder")}
               value={bottlesMin ?? ""}
               onChange={(e) => {
                 const val = e.target.value;
@@ -79,7 +82,7 @@ export function FilterSheet({
             className="w-full h-11 rounded-lg bg-[#363636] text-white hover:opacity-90 transition-opacity"
             onClick={() => onOpenChange(false)}
           >
-            Apply Filters
+            {t("apply")}
           </Button>
           <Button
             variant="ghost"
@@ -89,7 +92,7 @@ export function FilterSheet({
               setBottlesMin(undefined);
             }}
           >
-            Reset Filters
+            {t("reset")}
           </Button>
         </SheetFooter>
       </SheetContent>

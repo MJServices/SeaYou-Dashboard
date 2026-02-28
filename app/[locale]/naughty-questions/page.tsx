@@ -10,8 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getTranslations } from "next-intl/server";
 
 export default async function NaughtyQuestionsPage() {
+  const t = await getTranslations("NaughtyQuestions");
+  const commonT = await getTranslations("Common");
+
   const { data: questions, error } = await supabase
     .from("naughty_questions")
     .select("*")
@@ -20,25 +24,25 @@ export default async function NaughtyQuestionsPage() {
   if (error) console.error("Error fetching questions:", error);
 
   return (
-    <Shell title="Naughty Questions">
+    <Shell title={t("title")}>
       <div className="rounded-2xl border border-[#d9d9d9] bg-white">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Order
+                {t("order")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Category
+                {t("category")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Label
+                {t("label")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Question
+                {t("question")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Status
+                {t("status")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -59,11 +63,21 @@ export default async function NaughtyQuestionsPage() {
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${q.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                   >
-                    {q.is_active ? "Active" : "Inactive"}
+                    {q.is_active ? commonT("active") : commonT("inactive")}
                   </span>
                 </TableCell>
               </TableRow>
             ))}
+            {(!questions || questions.length === 0) && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center py-8 text-[#737373]"
+                >
+                  {t("notFound")}
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

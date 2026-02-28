@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 type ProfileDetails = {
   id: string;
@@ -34,6 +35,7 @@ type ProfileDetails = {
   total_bottles_received: number | null;
   secret_quote: string | null;
   secret_desire: string | null;
+  secret_audio_url: string | null;
   photos?: string[];
 };
 
@@ -49,6 +51,7 @@ export function UserProfileSheet({
   const [profile, setProfile] = useState<ProfileDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("Profile");
 
   useEffect(() => {
     if (open && userEmail) {
@@ -91,11 +94,11 @@ export function UserProfileSheet({
 
         setProfile({ ...p, photos });
       } else {
-        setError("User profile not found.");
+        setError(t("notFound"));
       }
     } catch (err: any) {
       console.error("Error fetching profile:", err);
-      setError(err.message || "Failed to load profile.");
+      setError(err.message || t("notFound"));
     } finally {
       setLoading(false);
     }
@@ -106,7 +109,7 @@ export function UserProfileSheet({
       <SheetContent className="sm:max-w-[450px] overflow-y-auto p-0">
         <div className="sr-only">
           <SheetHeader>
-            <SheetTitle>User Profile Details</SheetTitle>
+            <SheetTitle>{t("details")}</SheetTitle>
           </SheetHeader>
         </div>
         {loading ? (
@@ -134,7 +137,7 @@ export function UserProfileSheet({
               onClick={() => userEmail && fetchProfile(userEmail)}
               variant="outline"
             >
-              Retry
+              {t("retry")}
             </Button>
           </div>
         ) : profile ? (
@@ -152,7 +155,6 @@ export function UserProfileSheet({
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="text-gray-300 text-sm italic">Frame 128</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -165,7 +167,7 @@ export function UserProfileSheet({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem className="text-red-600 font-medium cursor-pointer">
-                      Block User
+                      {t("blockUser")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -188,20 +190,20 @@ export function UserProfileSheet({
                 </div>
                 <div className="space-y-1">
                   <h2 className="text-[24px] font-bold tracking-tight">
-                    {profile.full_name || "Unknown"}
+                    {profile.full_name || t("unknown")}
                   </h2>
                   <p className="text-[#363636] text-[16px]">{profile.email}</p>
                 </div>
               </div>
 
-              {/* Status Actions (Visible directly according to screenshot) */}
+              {/* Status Actions */}
               <div className="flex justify-end pr-4 -mt-10">
                 <div className="flex flex-col items-end gap-2">
                   <Button
                     variant="ghost"
                     className="text-red-500 font-bold hover:bg-red-50 hover:text-red-600"
                   >
-                    Block User
+                    {t("blockUser")}
                   </Button>
                 </div>
               </div>
@@ -209,57 +211,71 @@ export function UserProfileSheet({
               {/* Looking for */}
               <div className="space-y-2">
                 <h3 className="text-[14px] font-bold text-gray-400">
-                  What I'm looking for
+                  {t("lookingFor")}
                 </h3>
                 <p className="text-[18px] font-semibold">
-                  {profile.expectation || "A casual relationship"}
+                  {profile.expectation || t("notSpecified")}
                 </p>
               </div>
 
               {/* Fantasy */}
               <div className="space-y-2">
-                <h3 className="text-[14px] font-bold text-gray-400">Fantasy</h3>
+                <h3 className="text-[14px] font-bold text-gray-400">
+                  {t("fantasy")}
+                </h3>
                 <p className="text-[18px] font-semibold">
-                  Weekend getaway to a cozy villa
+                  {profile.secret_desire || t("notSpecified")}
                 </p>
               </div>
 
               {/* Quote */}
               <div className="space-y-2">
-                <h3 className="text-[14px] font-bold text-gray-400">Quote</h3>
+                <h3 className="text-[14px] font-bold text-gray-400">
+                  {t("quote")}
+                </h3>
                 <p className="text-[18px] font-semibold">
-                  {profile.secret_quote ||
-                    "Adventure seeker, coffee lover, and hopelesss romantic"}
+                  {profile.secret_quote || t("notSpecified")}
                 </p>
               </div>
 
               {/* Voice Message placeholder */}
               <div className="space-y-2">
                 <h3 className="text-[14px] font-bold text-gray-400">
-                  Voice Message
+                  {t("voiceMessage")}
                 </h3>
-                <p className="text-[18px] font-semibold">
-                  {profile.expectation || "A casual relationship"}
-                </p>
+                {profile.secret_audio_url ? (
+                  <audio controls className="w-full h-10 mt-1">
+                    <source src={profile.secret_audio_url} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                ) : (
+                  <p className="text-[18px] font-semibold text-gray-400 italic">
+                    {t("notSpecified")}
+                  </p>
+                )}
               </div>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-y-6">
                 <div className="space-y-1">
-                  <h3 className="text-[14px] font-bold text-gray-400">Age</h3>
+                  <h3 className="text-[14px] font-bold text-gray-400">
+                    {t("age")}
+                  </h3>
                   <p className="text-[18px] font-semibold">
-                    {profile.age || "N/A"}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-[14px] font-bold text-gray-400">City</h3>
-                  <p className="text-[18px] font-semibold">
-                    {profile.city || "N/A"}
+                    {profile.age || t("na")}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-[14px] font-bold text-gray-400">
-                    Bottles Received
+                    {t("city")}
+                  </h3>
+                  <p className="text-[18px] font-semibold">
+                    {profile.city || t("na")}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-[14px] font-bold text-gray-400">
+                    {t("bottlesReceived")}
                   </h3>
                   <p className="text-[18px] font-semibold">
                     {profile.total_bottles_received || 0}
@@ -267,7 +283,7 @@ export function UserProfileSheet({
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-[14px] font-bold text-gray-400">
-                    Bottles Sent
+                    {t("bottlesSent")}
                   </h3>
                   <p className="text-[18px] font-semibold">
                     {profile.total_bottles_sent || 0}
@@ -278,19 +294,19 @@ export function UserProfileSheet({
               {/* Sexual Orientation Tags */}
               <div className="space-y-3">
                 <h3 className="text-[14px] font-bold text-gray-400">
-                  Sexual Orientation
+                  {t("sexualOrientation")}
                 </h3>
                 <div className="flex flex-wrap gap-4 text-[16px] font-semibold text-[#363636]">
                   {profile.sexual_orientation?.length
                     ? profile.sexual_orientation.join("  ·  ")
-                    : "Not specified"}
+                    : t("notSpecified")}
                 </div>
               </div>
 
               {/* Interests Tags */}
               <div className="space-y-3">
                 <h3 className="text-[14px] font-bold text-gray-400">
-                  Interest
+                  {t("interest")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {profile.interests?.length ? (
@@ -304,7 +320,7 @@ export function UserProfileSheet({
                     ))
                   ) : (
                     <span className="text-[#363636] italic text-sm">
-                      No interests listed
+                      {t("noInterests")}
                     </span>
                   )}
                 </div>
@@ -313,7 +329,7 @@ export function UserProfileSheet({
               {/* Pictures Uploaded Gallery */}
               <div className="space-y-4">
                 <h3 className="text-[14px] font-bold text-gray-400">
-                  Pictures Uploaded
+                  {t("picturesUploaded")}
                 </h3>
                 {profile.photos && profile.photos.length > 0 ? (
                   <>
@@ -335,7 +351,7 @@ export function UserProfileSheet({
                   </>
                 ) : (
                   <p className="text-[14px] text-gray-400 italic">
-                    No pictures uploaded yet.
+                    {t("noPictures")}
                   </p>
                 )}
               </div>
@@ -343,7 +359,7 @@ export function UserProfileSheet({
           </div>
         ) : (
           <div className="flex h-full items-center justify-center text-gray-500">
-            No profile data found
+            {t("notFound")}
           </div>
         )}
       </SheetContent>

@@ -11,8 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { getTranslations } from "next-intl/server";
 
 export default async function FantasiesPage() {
+  const t = await getTranslations("Fantasies");
+  const commonT = await getTranslations("Common");
+
   const { data: fantasies, error } = await supabase
     .from("fantasies")
     .select(
@@ -29,22 +33,22 @@ export default async function FantasiesPage() {
   if (error) console.error("Error fetching fantasies:", error);
 
   return (
-    <Shell title="Fantasies">
+    <Shell title={t("title")}>
       <div className="rounded-2xl border border-[#d9d9d9] bg-white">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                User
+                {t("user")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Text
+                {t("text")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Status
+                {t("status")}
               </TableHead>
               <TableHead className="text-[#737373] bg-[#f5f5f5]">
-                Created At
+                {t("createdAt")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -52,7 +56,7 @@ export default async function FantasiesPage() {
             {fantasies?.map((f: any) => (
               <TableRow key={f.id}>
                 <TableCell className="font-medium text-[#363636]">
-                  <div>{f.profiles?.full_name || "Unknown"}</div>
+                  <div>{f.profiles?.full_name || commonT("unknown")}</div>
                   <div className="text-xs text-[#737373]">
                     {f.profiles?.email}
                   </div>
@@ -64,7 +68,7 @@ export default async function FantasiesPage() {
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${f.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                   >
-                    {f.is_active ? "Active" : "Inactive"}
+                    {f.is_active ? commonT("active") : commonT("inactive")}
                   </span>
                 </TableCell>
                 <TableCell className="text-[#363636]">
@@ -80,7 +84,7 @@ export default async function FantasiesPage() {
                   colSpan={4}
                   className="text-center py-8 text-[#737373]"
                 >
-                  No fantasies found.
+                  {t("notFound")}
                 </TableCell>
               </TableRow>
             )}

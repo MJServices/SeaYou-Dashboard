@@ -1,0 +1,114 @@
+{
+  "Dashboard": {
+    "title": "Tableau de bord",
+    "totalUsers": "Nombre total d'utilisateurs",
+    "activeUsers": "Utilisateurs actifs",
+    "bottlesSent": "Bouteilles envoyées",
+    "premiumUsers": "Utilisateurs Premium",
+    "users": "Utilisateurs",
+    "searchPlaceholder": "Recherche d'utilisateurs",
+    "filter": "Filtre",
+    "export": "Exporter",
+    "from": "Depuis",
+    "to": "À",
+    "trendText": "{isUp, select, true {+} other {-}}{trend}% (par rapport au mois dernier)"
+  },
+  "Users": {
+    "title": "Utilisateurs",
+    "searchPlaceholder": "Recherche d'utilisateurs",
+    "filter": "Filtre",
+    "export": "Exporter",
+    "idNumber": "Numéro d'identification",
+    "name": "Nom",
+    "emailAddress": "Adresse email",
+    "lastActive": "Dernière activité",
+    "bottlesSent": "Bouteilles envoyées",
+    "type": "Taper",
+    "basic": "Basique",
+    "premium": "Prime",
+    "all": "Tous",
+    "advanced": "Avancé...",
+    "select": "Sélectionner"
+  },
+  "Sidebar": {
+    "dashboard": "Tableau de bord",
+    "users": "Utilisateurs",
+    "admin": "Administration SeaYou",
+    "close": "Fermer"
+  },
+  "Header": {
+    "menu": "Menu",
+    "collapse": "Effondrement",
+    "searchPlaceholder": "Recherchez n'importe quoi"
+  },
+  "Filters": {
+    "title": "Filtres",
+    "type": "Taper",
+    "allTypes": "Tous types",
+    "basic": "Basique",
+    "premium": "Prime",
+    "minBottles": "Bouteilles minimales envoyées",
+    "minBottlesPlaceholder": "par exemple 10",
+    "apply": "Appliquer les filtres",
+    "reset": "Réinitialiser les filtres"
+  },
+  "Profile": {
+    "details": "Détails du profil utilisateur",
+    "unknown": "Inconnu",
+    "blockUser": "Bloquer l'utilisateur",
+    "lookingFor": "Ce que je recherche",
+    "fantasy": "Fantaisie",
+    "quote": "Citation",
+    "voiceMessage": "Message vocal",
+    "age": "Âge",
+    "city": "Ville",
+    "bottlesReceived": "Bouteilles reçues",
+    "bottlesSent": "Bouteilles envoyées",
+    "sexualOrientation": "Orientation sexuelle",
+    "interest": "Intérêt",
+    "picturesUploaded": "Photos téléchargées",
+    "noInterests": "Aucun intérêt déclaré",
+    "noPictures": "Aucune image n'a encore été téléchargée.",
+    "retry": "Réessayer",
+    "notFound": "Profil utilisateur introuvable.",
+    "loading": "Chargement...",
+    "notSpecified": "Non spécifié",
+    "na": "N/D"
+  },
+  "Export": {
+    "title": "Exporter les utilisateurs",
+    "description": "Exportation CSV des utilisateurs filtrés.",
+    "cancel": "Annuler",
+    "confirm": "Exporter"
+  },
+  "Common": {
+    "unknown": "Inconnu",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "loading": "Chargement...",
+    "error": "Erreur"
+  },
+  "Shell": {
+    "dashboard": "Tableau de bord",
+    "users": "Utilisateurs",
+    "fantasies": "Fantasmes",
+    "naughtyQuestions": "Questions coquines"
+  },
+  "Fantasies": {
+    "title": "Fantasmes",
+    "user": "Utilisateur",
+    "text": "Texte",
+    "status": "Statut",
+    "createdAt": "Créé le",
+    "notFound": "Aucun fantasme trouvé."
+  },
+  "NaughtyQuestions": {
+    "title": "Questions coquines",
+    "order": "Ordre",
+    "category": "Catégorie",
+    "label": "Étiquette",
+    "question": "Question",
+    "status": "Statut",
+    "notFound": "Aucune question trouvée."
+  }
+}

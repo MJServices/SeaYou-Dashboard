@@ -1,11 +1,7 @@
 "use client";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
-
-const items = [
-  { href: "/", label: "Dashboard" },
-  { href: "/users", label: "Users" },
-];
+import { useTranslations } from "next-intl";
 
 export function Sidebar({
   collapsed,
@@ -16,6 +12,13 @@ export function Sidebar({
   mobileOpen?: boolean;
   onClose?: () => void;
 }) {
+  const t = useTranslations("Sidebar");
+
+  const items = [
+    { href: "/", label: t("dashboard") },
+    { href: "/users", label: t("users") },
+  ];
+
   const content = (
     <div className="flex min-h-screen flex-col border-r border-[#e5e5e5] bg-white">
       <div className="px-6 py-6">
@@ -28,7 +31,7 @@ export function Sidebar({
           />
           {!collapsed && (
             <span className="text-[#363636] text-lg font-semibold">
-              SeaYou Admin
+              {t("admin")}
             </span>
           )}
         </div>

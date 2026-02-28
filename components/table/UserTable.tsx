@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTranslations, useFormatter } from "next-intl";
 
 export type UserRow = {
   id: string;
@@ -16,16 +17,6 @@ export type UserRow = {
   type: "Basic" | "Premium";
 };
 
-function formatLastActive(d: Date) {
-  const diff = Math.floor((Date.now() - d.getTime()) / 60000);
-  if (diff < 1) return "just now";
-  if (diff < 60) return `${diff} mins ago`;
-  const hrs = Math.floor(diff / 60);
-  if (hrs < 24) return `${hrs} hr${hrs > 1 ? "s" : ""} ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days} day${days > 1 ? "s" : ""} ago`;
-}
-
 export function UserTable({
   rows,
   onRowClick,
@@ -33,6 +24,9 @@ export function UserTable({
   rows: UserRow[];
   onRowClick?: (row: UserRow) => void;
 }) {
+  const t = useTranslations("Users");
+  const format = useFormatter();
+
   return (
     <div className="rounded-2xl border border-[#d9d9d9]">
       <div className="hidden md:block">
@@ -40,22 +34,22 @@ export function UserTable({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
-                ID Number
+                {t("idNumber")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
-                Name
+                {t("name")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
-                Email Address
+                {t("emailAddress")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
-                Last Active
+                {t("lastActive")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
-                Bottles Sent
+                {t("bottlesSent")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
-                Type
+                {t("type")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -78,13 +72,13 @@ export function UserTable({
                   </span>
                 </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
-                  {formatLastActive(r.lastActive)}
+                  {format.relativeTime(r.lastActive)}
                 </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
                   {r.bottles}
                 </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
-                  {r.type}
+                  {r.type === "Basic" ? t("basic") : t("premium")}
                 </TableCell>
               </TableRow>
             ))}
@@ -105,13 +99,13 @@ export function UserTable({
                     {r.name}
                   </p>
                   <span className="rounded-full border border-[#d9d9d9] px-2 py-1 text-[12px] text-[#363636]">
-                    {r.type}
+                    {r.type === "Basic" ? t("basic") : t("premium")}
                   </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div className="text-[14px] text-[#737373]">{r.id}</div>
                   <div className="text-[14px] text-[#737373]">
-                    {formatLastActive(r.lastActive)}
+                    {format.relativeTime(r.lastActive)}
                   </div>
                   <div className="col-span-2 text-[14px] text-[#363636]">
                     {r.email}
@@ -119,7 +113,7 @@ export function UserTable({
                 </div>
                 <div className="mt-2 flex items-center justify-between">
                   <span className="text-[14px] text-[#737373]">
-                    Bottles Sent
+                    {t("bottlesSent")}
                   </span>
                   <span className="text-[16px] font-semibold text-[#363636]">
                     {r.bottles}
