@@ -21,36 +21,46 @@ import { ExportSheet } from "@/components/sheets/ExportSheet";
 import { FilterSheet } from "@/components/sheets/FilterSheet";
 import { UserProfileSheet } from "@/components/sheets/UserProfileSheet";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+import { format } from "date-fns";
 
 export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
+  const [users, setUsers] = useState<UserRow[]>(initialUsers);
   const [query, setQuery] = useState("");
   const [type, setType] = useState<"All" | "Basic" | "Premium">("All");
   const [from, setFrom] = useState<Date | undefined>();
   const [to, setTo] = useState<Date | undefined>();
   const [bottlesMin, setBottlesMin] = useState<number | undefined>();
+  const [gender, setGender] = useState<"All" | "male" | "female" | "nonbinary">("All");
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
     null,
   );
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const t = useTranslations("Users");
 
   const filtered = useMemo(() => {
-    return initialUsers.filter((r) => {
-      const matchesQuery = [r.id, r.name, r.email].some((s) =>
-        s.toLowerCase().includes(query.toLowerCase()),
+    return users.filter((r) => {
+      const q = query.toLowerCase().trim();
+      const matchesQuery = !q || [r.id, r.name, r.email, r.fullId].some((s) =>
+        s?.toLowerCase().includes(q),
       );
       const matchesType = type === "All" ? true : r.type === type;
+      const matchesGender = gender === "All" ? true : r.gender === gender;
       const afterFrom = from ? r.lastActive >= from : true;
       const beforeTo = to ? r.lastActive <= to : true;
       const meetsBottles =
         bottlesMin !== undefined ? r.bottles >= bottlesMin : true;
       return (
-        matchesQuery && matchesType && afterFrom && beforeTo && meetsBottles
+        matchesQuery && matchesType && matchesGender && afterFrom && beforeTo && meetsBottles
       );
     });
-  }, [query, type, from, to, bottlesMin, initialUsers]);
+  }, [query, type, gender, from, to, bottlesMin, users]);
 
   function exportCsv() {
     const header = [
@@ -59,6 +69,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
       t("emailAddress"),
       t("lastActive"),
       t("bottlesSent"),
+      t("gender"),
       t("type"),
     ];
     const rows = filtered.map((r) => [
@@ -67,6 +78,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
       r.email,
       r.lastActive.toISOString(),
       String(r.bottles),
+      r.gender || "-",
       r.type === "Basic" ? t("basic") : t("premium"),
     ]);
     const csv = [header, ...rows]
@@ -98,36 +110,51 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
           />
         </div>
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="secondary"
-                className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]"
-              >
-                <Image
-                  src="/assets/figma/filter.svg"
-                  alt="filter"
-                  width={20}
-                  height={20}
-                />
-                {t("filter")}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[200px]">
-              <DropdownMenuItem onClick={() => setType("All")}>
-                {t("type")}: {t("all")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setType("Basic")}>
-                {t("type")}: {t("basic")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setType("Premium")}>
-                {t("type")}: {t("premium")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterOpen(true)}>
-                {t("advanced")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {mounted ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]"
+                >
+                  <Image
+                    src="/assets/figma/filter.svg"
+                    alt="filter"
+                    width={20}
+                    height={20}
+                  />
+                  {t("filter")}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[200px]">
+                <DropdownMenuItem onClick={() => setType("All")}>
+                  {t("type")}: {t("all")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setType("Basic")}>
+                  {t("type")}: {t("basic")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setType("Premium")}>
+                  {t("type")}: {t("premium")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterOpen(true)}>
+                  {t("advanced")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="secondary"
+              className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]"
+            >
+              <Image
+                src="/assets/figma/filter.svg"
+                alt="filter"
+                width={20}
+                height={20}
+              />
+              {t("filter")}
+            </Button>
+          )}
           <Button
             className="inline-flex items-center gap-2 rounded-lg bg-[#363636] px-4 py-3 text-white"
             onClick={() => setExportOpen(true)}
@@ -144,35 +171,36 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
       </div>
       <div className="mt-4 flex items-center justify-between">
         <div className="flex gap-6">
-          <Popover>
-            <PopoverTrigger className="text-[16px] font-medium text-[#363636]">
-              {t("from")}: {from ? from.toLocaleDateString() : t("select")}
-            </PopoverTrigger>
-            <PopoverContent className="p-0">
-              <Calendar mode="single" selected={from} onSelect={setFrom} />
-            </PopoverContent>
-          </Popover>
-          <Popover>
-            <PopoverTrigger className="text-[16px] font-medium text-[#363636]">
-              {t("to")}: {to ? to.toLocaleDateString() : t("select")}
-            </PopoverTrigger>
-            <PopoverContent className="p-0">
-              <Calendar mode="single" selected={to} onSelect={setTo} />
-            </PopoverContent>
-          </Popover>
+          {mounted ? (
+            <>
+              <Popover>
+                <PopoverTrigger className="text-[16px] font-medium text-[#363636]">
+                  {t("from")}: {from ? format(from, "dd/MM/yyyy") : t("select")}
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Calendar mode="single" selected={from} onSelect={setFrom} />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger className="text-[16px] font-medium text-[#363636]">
+                  {t("to")}: {to ? format(to, "dd/MM/yyyy") : t("select")}
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Calendar mode="single" selected={to} onSelect={setTo} />
+                </PopoverContent>
+              </Popover>
+            </>
+          ) : (
+            <>
+              <span className="text-[16px] font-medium text-[#363636]">
+                {t("from")}: {t("select")}
+              </span>
+              <span className="text-[16px] font-medium text-[#363636]">
+                {t("to")}: {t("select")}
+              </span>
+            </>
+          )}
         </div>
-        <Button
-          className="inline-flex items-center gap-2 rounded-lg bg-[#363636] px-4 py-3 text-white"
-          onClick={() => setExportOpen(true)}
-        >
-          <Image
-            src="/assets/figma/share.svg"
-            alt="share"
-            width={20}
-            height={20}
-          />
-          {t("export")}
-        </Button>
       </div>
       <div className="mt-4">
         <UserTable
@@ -183,27 +211,37 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
           }}
         />
       </div>
-      <ExportSheet
-        open={exportOpen}
-        onOpenChange={setExportOpen}
-        onConfirm={() => {
-          setExportOpen(false);
-          exportCsv();
-        }}
-      />
-      <FilterSheet
-        open={filterOpen}
-        onOpenChange={setFilterOpen}
-        type={type}
-        setType={setType}
-        bottlesMin={bottlesMin}
-        setBottlesMin={setBottlesMin}
-      />
-      <UserProfileSheet
-        userEmail={selectedUserEmail}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      {mounted && (
+        <>
+          <ExportSheet
+            open={exportOpen}
+            onOpenChange={setExportOpen}
+            onConfirm={() => {
+              setExportOpen(false);
+              exportCsv();
+            }}
+          />
+          <FilterSheet
+            open={filterOpen}
+            onOpenChange={setFilterOpen}
+            type={type}
+            setType={setType}
+            gender={gender}
+            setGender={setGender}
+            bottlesMin={bottlesMin}
+            setBottlesMin={setBottlesMin}
+          />
+          <UserProfileSheet
+            key={selectedUserEmail || "empty"}
+            userEmail={selectedUserEmail}
+            open={detailOpen}
+            onOpenChange={setDetailOpen}
+            onUserDeleted={(deletedEmail: string) => {
+              setUsers((prev) => prev.filter((u) => u.email !== deletedEmail));
+            }}
+          />
+        </>
+      )}
     </Shell>
   );
 }

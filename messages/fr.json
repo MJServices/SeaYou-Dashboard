@@ -18,6 +18,8 @@
     "searchPlaceholder": "Recherche d'utilisateurs",
     "filter": "Filtre",
     "export": "Exporter",
+    "from": "Depuis",
+    "to": "À",
     "idNumber": "Numéro d'identification",
     "name": "Nom",
     "emailAddress": "Adresse email",
@@ -28,7 +30,12 @@
     "premium": "Prime",
     "all": "Tous",
     "advanced": "Avancé...",
-    "select": "Sélectionner"
+    "select": "Sélectionner",
+    "gender": "Genre",
+    "male": "Homme",
+    "female": "Femme",
+    "nonbinary": "Non-binaire",
+    "other": "Autre"
   },
   "Sidebar": {
     "dashboard": "Tableau de bord",
@@ -55,7 +62,7 @@
   "Profile": {
     "details": "Détails du profil utilisateur",
     "unknown": "Inconnu",
-    "blockUser": "Bloquer l'utilisateur",
+    "blockUser": "Supprimer l'utilisateur",
     "lookingFor": "Ce que je recherche",
     "fantasy": "Fantaisie",
     "quote": "Citation",
@@ -73,7 +80,10 @@
     "notFound": "Profil utilisateur introuvable.",
     "loading": "Chargement...",
     "notSpecified": "Non spécifié",
-    "na": "N/D"
+    "na": "N/D",
+    "blockSuccess": "Utilisateur supprimé avec succès.",
+    "cancel": "Annuler",
+    "confirmDelete": "Confirmer la suppression"
   },
   "Export": {
     "title": "Exporter les utilisateurs",

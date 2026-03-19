@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { deleteUserAction } from "@/lib/actions";
 import {
   Sheet,
   SheetContent,
@@ -10,7 +12,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { MoreHorizontal, ChevronLeft } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +38,7 @@ type ProfileDetails = {
   secret_quote: string | null;
   secret_desire: string | null;
   secret_audio_url: string | null;
+  is_active: boolean;
   photos?: string[];
 };
 
@@ -43,14 +46,19 @@ export function UserProfileSheet({
   userEmail,
   open,
   onOpenChange,
+  onUserDeleted,
 }: {
   userEmail: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUserDeleted?: (email: string) => void;
 }) {
   const [profile, setProfile] = useState<ProfileDetails | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const t = useTranslations("Profile");
 
   useEffect(() => {
@@ -104,9 +112,35 @@ export function UserProfileSheet({
     }
   }
 
+  async function handleBlockUser() {
+    if (!profile) return;
+    
+    setIsDeleting(true);
+    setShowConfirm(false);
+    console.log(`Front-end: Calling deleteUserAction for profile.id: ${profile.id}`);
+    try {
+      const result = await deleteUserAction(profile.id);
+      console.log("Front-end: deleteUserAction result:", result);
+
+      if (!result.success) throw new Error(result.error);
+
+      alert(t("blockSuccess"));
+      if (onUserDeleted && profile.email) {
+        onUserDeleted(profile.email);
+      }
+      onOpenChange(false);
+      router.refresh();
+    } catch (err: any) {
+      console.error("Error blocking user:", err);
+      alert(err.message || "Error blocking user");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[450px] overflow-y-auto p-0">
+      <SheetContent className="sm:max-w-[450px] overflow-y-auto p-0" suppressHydrationWarning>
         <div className="sr-only">
           <SheetHeader>
             <SheetTitle>{t("details")}</SheetTitle>
@@ -166,7 +200,12 @@ export function UserProfileSheet({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem className="text-red-600 font-medium cursor-pointer">
+                    <DropdownMenuItem
+                      className="text-red-600 font-medium cursor-pointer flex items-center gap-2"
+                      onClick={handleBlockUser}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
                       {t("blockUser")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -197,14 +236,44 @@ export function UserProfileSheet({
               </div>
 
               {/* Status Actions */}
-              <div className="flex justify-end pr-4 -mt-10">
-                <div className="flex flex-col items-end gap-2">
-                  <Button
-                    variant="ghost"
-                    className="text-red-500 font-bold hover:bg-red-50 hover:text-red-600"
-                  >
-                    {t("blockUser")}
-                  </Button>
+              <div className="flex justify-end pr-4 py-2 border-b border-gray-50 bg-gray-50/50 rounded-lg mx-6">
+                <div className="flex items-center gap-3">
+                  {!showConfirm ? (
+                    <Button
+                      variant="ghost"
+                      className="text-red-500 font-bold hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
+                      onClick={() => setShowConfirm(true)}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {t("blockUser")}
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2 scale-in-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 font-medium hover:bg-gray-100"
+                        onClick={() => setShowConfirm(false)}
+                        disabled={isDeleting}
+                      >
+                        {t("cancel")}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="font-bold flex items-center gap-2 shadow-sm"
+                        onClick={handleBlockUser}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <span className="text-[12px]">{t("confirmDelete")}</span>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
 

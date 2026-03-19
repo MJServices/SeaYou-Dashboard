@@ -138,6 +138,8 @@ export default async function Home() {
       type: (user.tier === "premium" || user.tier === "elite"
         ? "Premium"
         : "Basic") as "Basic" | "Premium",
+      gender: user.gender,
+      fullId: user.id,
     })) || [];
 
   return <DashboardClient stats={stats} initialUsers={rows} />;

@@ -15,6 +15,8 @@ export type UserRow = {
   lastActive: Date;
   bottles: number;
   type: "Basic" | "Premium";
+  gender?: string | null;
+  fullId: string;
 };
 
 export function UserTable({
@@ -26,6 +28,22 @@ export function UserTable({
 }) {
   const t = useTranslations("Users");
   const format = useFormatter();
+
+  const getGenderLabel = (gender?: string | null) => {
+    if (!gender) return "-";
+    switch (gender.toLowerCase()) {
+      case "male":
+        return t("male");
+      case "female":
+        return t("female");
+      case "nonbinary":
+        return t("nonbinary");
+      case "other":
+        return t("other");
+      default:
+        return gender;
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-[#d9d9d9]">
@@ -47,6 +65,9 @@ export function UserTable({
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
                 {t("bottlesSent")}
+              </TableHead>
+              <TableHead className="text-[#e11d48] sticky top-0 z-10 bg-[#f5f5f5]">
+                {t("gender")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
                 {t("type")}
@@ -77,6 +98,9 @@ export function UserTable({
                 <TableCell className="text-[16px] font-medium text-[#363636]">
                   {r.bottles}
                 </TableCell>
+                <TableCell className="text-[16px] font-medium text-[#e11d48]">
+                  {getGenderLabel(r.gender)}
+                </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
                   {r.type === "Basic" ? t("basic") : t("premium")}
                 </TableCell>
@@ -106,6 +130,9 @@ export function UserTable({
                   <div className="text-[14px] text-[#737373]">{r.id}</div>
                   <div className="text-[14px] text-[#737373]">
                     {format.relativeTime(r.lastActive)}
+                  </div>
+                  <div className="text-[14px] font-medium text-[#e11d48]">
+                    {getGenderLabel(r.gender)}
                   </div>
                   <div className="col-span-2 text-[14px] text-[#363636]">
                     {r.email}

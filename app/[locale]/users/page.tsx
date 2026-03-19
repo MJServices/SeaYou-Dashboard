@@ -37,10 +37,12 @@ export default async function UsersPage() {
       email: user.email,
       lastActive: user.last_active ? new Date(user.last_active) : new Date(),
       bottles: bottleCounts[user.id] ?? user.total_bottles_sent ?? 0,
-      type: (user.tier === "premium" || user.tier === "elite"
-        ? "Premium"
-        : "Basic") as "Basic" | "Premium",
-    })) || [];
+        type: (user.tier === "premium" || user.tier === "elite"
+          ? "Premium"
+          : "Basic") as "Basic" | "Premium",
+        gender: user.gender,
+        fullId: user.id,
+      })) || [];
 
   return <UsersClient initialUsers={users} />;
 }

@@ -25,9 +25,9 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className={`${montserrat.variable} font-sans antialiased`}>
-        <NextIntlClientProvider messages={messages} now={new Date()}>
+    <html lang={locale} suppressHydrationWarning>
+      <body className={`${montserrat.variable} font-sans antialiased`} suppressHydrationWarning>
+        <NextIntlClientProvider messages={messages} now={new Date(1773945000000)}>
           {children}
         </NextIntlClientProvider>
       </body>

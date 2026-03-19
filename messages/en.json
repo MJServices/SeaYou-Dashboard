@@ -18,6 +18,8 @@
     "searchPlaceholder": "Search for users",
     "filter": "Filter",
     "export": "Export",
+    "from": "From",
+    "to": "To",
     "idNumber": "ID Number",
     "name": "Name",
     "emailAddress": "Email Address",
@@ -28,7 +30,12 @@
     "premium": "Premium",
     "all": "All",
     "advanced": "Advanced...",
-    "select": "Select"
+    "select": "Select",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "nonbinary": "Non-binary",
+    "other": "Other"
   },
   "Sidebar": {
     "dashboard": "Dashboard",
@@ -55,7 +62,7 @@
   "Profile": {
     "details": "User Profile Details",
     "unknown": "Unknown",
-    "blockUser": "Block User",
+    "blockUser": "Delete User",
     "lookingFor": "What I'm looking for",
     "fantasy": "Fantasy",
     "quote": "Quote",
@@ -73,7 +80,10 @@
     "notFound": "User profile not found.",
     "loading": "Loading...",
     "notSpecified": "Not specified",
-    "na": "N/A"
+    "na": "N/A",
+    "blockSuccess": "User deleted successfully.",
+    "cancel": "Cancel",
+    "confirmDelete": "Confirm Deletion"
   },
   "Export": {
     "title": "Export Users",

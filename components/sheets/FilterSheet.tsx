@@ -22,17 +22,22 @@ export function FilterSheet({
   onOpenChange,
   type,
   setType,
+  gender,
+  setGender,
   bottlesMin,
   setBottlesMin,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   type: "All" | "Basic" | "Premium";
-  setType: (t: "All" | "Basic" | "Premium") => void;
+  setType: (t: any) => void;
+  gender: "All" | "male" | "female" | "nonbinary";
+  setGender: (g: any) => void;
   bottlesMin: number | undefined;
-  setBottlesMin: (n: number | undefined) => void;
+  setBottlesMin: (n: any) => void;
 }) {
   const t = useTranslations("Filters");
+  const ut = useTranslations("Users");
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -53,6 +58,22 @@ export function FilterSheet({
                 <SelectItem value="All">{t("allTypes")}</SelectItem>
                 <SelectItem value="Basic">{t("basic")}</SelectItem>
                 <SelectItem value="Premium">{t("premium")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-[14px] font-semibold text-[#363636] mb-1">
+              {ut("gender")}
+            </label>
+            <Select value={gender} onValueChange={(v) => setGender(v as any)}>
+              <SelectTrigger className="w-full h-11 rounded-lg border-[#d9d9d9]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">{ut("all")}</SelectItem>
+                <SelectItem value="male">{ut("male")}</SelectItem>
+                <SelectItem value="female">{ut("female")}</SelectItem>
+                <SelectItem value="nonbinary">{ut("nonbinary")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -89,6 +110,7 @@ export function FilterSheet({
             className="w-full h-11 text-[#737373] hover:text-[#363636]"
             onClick={() => {
               setType("All");
+              setGender("All");
               setBottlesMin(undefined);
             }}
           >

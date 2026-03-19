@@ -6,7 +6,7 @@ import { StatCard } from "@/components/cards/StatCard";
 import { UserTable, UserRow } from "@/components/table/UserTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { format, subDays } from "date-fns";
 import { FilterSheet } from "@/components/sheets/FilterSheet";
 import { UserProfileSheet } from "@/components/sheets/UserProfileSheet";
@@ -25,6 +25,7 @@ type Props = {
 };
 
 export function DashboardClient({ stats, initialUsers }: Props) {
+  const [users, setUsers] = useState<UserRow[]>(initialUsers);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -35,21 +36,31 @@ export function DashboardClient({ stats, initialUsers }: Props) {
     "All",
   );
   const [bottlesMin, setBottlesMin] = useState<number | undefined>();
+  const [gender, setGender] = useState<"All" | "male" | "female" | "nonbinary">("All");
 
-  const fromDate = format(subDays(new Date(), 30), "MMM d, yyyy");
-  const toDate = format(new Date(), "MMM d, yyyy");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setFromDate(format(subDays(new Date(), 30), "MMM d, yyyy"));
+    setToDate(format(new Date(), "MMM d, yyyy"));
+  }, []);
 
   const filteredUsers = useMemo(() => {
-    return initialUsers.filter((u) => {
-      const matchesSearch = [u.name, u.email, u.id].some((field) =>
-        field.toLowerCase().includes(searchQuery.toLowerCase()),
+    return users.filter((u) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch = !q || [u.name, u.email, u.id, u.fullId].some((field) =>
+        field?.toLowerCase().includes(q),
       );
       const matchesType = filterType === "All" || u.type === filterType;
+      const matchesGender = gender === "All" || u.gender === gender;
       const matchesBottles =
         bottlesMin === undefined || u.bottles >= bottlesMin;
-      return matchesSearch && matchesType && matchesBottles;
+      return matchesSearch && matchesType && matchesGender && matchesBottles;
     });
-  }, [searchQuery, initialUsers, filterType, bottlesMin]);
+  }, [searchQuery, users, filterType, gender, bottlesMin]);
 
   function exportCsv() {
     const header = [
@@ -58,6 +69,7 @@ export function DashboardClient({ stats, initialUsers }: Props) {
       "Email Address",
       "Last Active",
       "Bottles Sent",
+      "Gender",
       "Type",
     ];
     const rows = filteredUsers.map((r) => [
@@ -66,6 +78,7 @@ export function DashboardClient({ stats, initialUsers }: Props) {
       r.email,
       r.lastActive.toISOString(),
       String(r.bottles),
+      r.gender || "-",
       r.type,
     ]);
     const csv = [header, ...rows]
@@ -137,19 +150,34 @@ export function DashboardClient({ stats, initialUsers }: Props) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button
-              onClick={() => setFilterOpen(true)}
-              variant="secondary"
-              className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]"
-            >
-              <Image
-                src="/assets/figma/filter.svg"
-                alt="filter"
-                width={20}
-                height={20}
-              />
-              {t("filter")}
-            </Button>
+            {mounted ? (
+              <Button
+                onClick={() => setFilterOpen(true)}
+                variant="secondary"
+                className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]"
+              >
+                <Image
+                  src="/assets/figma/filter.svg"
+                  alt="filter"
+                  width={20}
+                  height={20}
+                />
+                {t("filter")}
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                className="h-11 gap-2 rounded-lg border border-[#d9d9d9] bg-white text-[#737373]"
+              >
+                <Image
+                  src="/assets/figma/filter.svg"
+                  alt="filter"
+                  width={20}
+                  height={20}
+                />
+                {t("filter")}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -187,20 +215,30 @@ export function DashboardClient({ stats, initialUsers }: Props) {
         </div>
       </section>
 
-      <FilterSheet
-        open={filterOpen}
-        onOpenChange={setFilterOpen}
-        type={filterType}
-        setType={setFilterType}
-        bottlesMin={bottlesMin}
-        setBottlesMin={setBottlesMin}
-      />
+      {mounted && (
+        <>
+          <FilterSheet
+            open={filterOpen}
+            onOpenChange={setFilterOpen}
+            type={filterType}
+            setType={setFilterType}
+            gender={gender}
+            setGender={setGender}
+            bottlesMin={bottlesMin}
+            setBottlesMin={setBottlesMin}
+          />
 
-      <UserProfileSheet
-        userEmail={selectedUserEmail}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+          <UserProfileSheet
+            key={selectedUserEmail || "empty"}
+            userEmail={selectedUserEmail}
+            open={detailOpen}
+            onOpenChange={setDetailOpen}
+            onUserDeleted={(deletedEmail: string) => {
+              setUsers((prev) => prev.filter((u) => u.email !== deletedEmail));
+            }}
+          />
+        </>
+      )}
     </Shell>
   );
 }
