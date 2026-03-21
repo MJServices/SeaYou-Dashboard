@@ -16,6 +16,8 @@ export type UserRow = {
   bottles: number;
   type: "Basic" | "Premium";
   gender?: string | null;
+  age?: number | null;
+  city?: string | null;
   fullId: string;
 };
 

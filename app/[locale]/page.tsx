@@ -139,6 +139,8 @@ export default async function Home() {
         ? "Premium"
         : "Basic") as "Basic" | "Premium",
       gender: user.gender,
+      age: user.age,
+      city: user.city,
       fullId: user.id,
     })) || [];
 

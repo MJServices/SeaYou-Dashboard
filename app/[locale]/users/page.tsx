@@ -41,6 +41,8 @@ export default async function UsersPage() {
           ? "Premium"
           : "Basic") as "Basic" | "Premium",
         gender: user.gender,
+        age: user.age,
+        city: user.city,
         fullId: user.id,
       })) || [];
 

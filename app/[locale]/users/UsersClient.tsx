@@ -32,6 +32,9 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   const [to, setTo] = useState<Date | undefined>();
   const [bottlesMin, setBottlesMin] = useState<number | undefined>();
   const [gender, setGender] = useState<"All" | "male" | "female" | "nonbinary">("All");
+  const [minAge, setMinAge] = useState<number | undefined>();
+  const [maxAge, setMaxAge] = useState<number | undefined>();
+  const [city, setCity] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -47,7 +50,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   const filtered = useMemo(() => {
     return users.filter((r) => {
       const q = query.toLowerCase().trim();
-      const matchesQuery = !q || [r.id, r.name, r.email, r.fullId].some((s) =>
+      const matchesQuery = !q || [r.id, r.name, r.email, r.fullId, r.city].some((s) =>
         s?.toLowerCase().includes(q),
       );
       const matchesType = type === "All" ? true : r.type === type;
@@ -56,11 +59,24 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
       const beforeTo = to ? r.lastActive <= to : true;
       const meetsBottles =
         bottlesMin !== undefined ? r.bottles >= bottlesMin : true;
+      
+      const meetsMinAge = minAge !== undefined ? (r.age ?? 0) >= minAge : true;
+      const meetsMaxAge = maxAge !== undefined ? (r.age ?? 0) <= maxAge : true;
+      const matchesCity = !city || r.city?.toLowerCase().includes(city.toLowerCase());
+
       return (
-        matchesQuery && matchesType && matchesGender && afterFrom && beforeTo && meetsBottles
+        matchesQuery && 
+        matchesType && 
+        matchesGender && 
+        afterFrom && 
+        beforeTo && 
+        meetsBottles &&
+        meetsMinAge &&
+        meetsMaxAge &&
+        matchesCity
       );
     });
-  }, [query, type, gender, from, to, bottlesMin, users]);
+  }, [query, type, gender, from, to, bottlesMin, minAge, maxAge, city, users]);
 
   function exportCsv() {
     const header = [
@@ -230,6 +246,12 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
             setGender={setGender}
             bottlesMin={bottlesMin}
             setBottlesMin={setBottlesMin}
+            minAge={minAge}
+            setMinAge={setMinAge}
+            maxAge={maxAge}
+            setMaxAge={setMaxAge}
+            city={city}
+            setCity={setCity}
           />
           <UserProfileSheet
             key={selectedUserEmail || "empty"}

@@ -26,6 +26,12 @@ export function FilterSheet({
   setGender,
   bottlesMin,
   setBottlesMin,
+  minAge,
+  setMinAge,
+  maxAge,
+  setMaxAge,
+  city,
+  setCity,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -35,6 +41,12 @@ export function FilterSheet({
   setGender: (g: any) => void;
   bottlesMin: number | undefined;
   setBottlesMin: (n: any) => void;
+  minAge: number | undefined;
+  setMinAge: (n: any) => void;
+  maxAge: number | undefined;
+  setMaxAge: (n: any) => void;
+  city: string;
+  setCity: (s: string) => void;
 }) {
   const t = useTranslations("Filters");
   const ut = useTranslations("Users");
@@ -79,6 +91,52 @@ export function FilterSheet({
           </div>
           <div>
             <label className="block text-[14px] font-semibold text-[#363636] mb-1">
+              {t("ageRange")}
+            </label>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                className="h-11 rounded-lg border-[#d9d9d9]"
+                placeholder={t("minAge")}
+                value={minAge ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") setMinAge(undefined);
+                  else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) setMinAge(num);
+                  }
+                }}
+              />
+              <Input
+                type="number"
+                className="h-11 rounded-lg border-[#d9d9d9]"
+                placeholder={t("maxAge")}
+                value={maxAge ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") setMaxAge(undefined);
+                  else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) setMaxAge(num);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[14px] font-semibold text-[#363636] mb-1">
+              {t("city")}
+            </label>
+            <Input
+              className="h-11 rounded-lg border-[#d9d9d9]"
+              placeholder={t("cityPlaceholder")}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-[14px] font-semibold text-[#363636] mb-1">
               {t("minBottles")}
             </label>
             <Input
@@ -112,6 +170,9 @@ export function FilterSheet({
               setType("All");
               setGender("All");
               setBottlesMin(undefined);
+              setMinAge(undefined);
+              setMaxAge(undefined);
+              setCity("");
             }}
           >
             {t("reset")}

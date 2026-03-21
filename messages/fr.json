@@ -56,6 +56,11 @@
     "premium": "Prime",
     "minBottles": "Bouteilles minimales envoyées",
     "minBottlesPlaceholder": "par exemple 10",
+    "ageRange": "Tranche d'âge",
+    "minAge": "Âge min",
+    "maxAge": "Âge max",
+    "city": "Ville",
+    "cityPlaceholder": "Rechercher par ville",
     "apply": "Appliquer les filtres",
     "reset": "Réinitialiser les filtres"
   },

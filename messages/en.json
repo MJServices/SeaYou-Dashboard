@@ -56,6 +56,11 @@
     "premium": "Premium",
     "minBottles": "Min Bottles Sent",
     "minBottlesPlaceholder": "e.g. 10",
+    "ageRange": "Age Range",
+    "minAge": "Min Age",
+    "maxAge": "Max Age",
+    "city": "City",
+    "cityPlaceholder": "Search by city",
     "apply": "Apply Filters",
     "reset": "Reset Filters"
   },

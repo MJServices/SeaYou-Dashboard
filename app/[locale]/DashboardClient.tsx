@@ -38,6 +38,10 @@ export function DashboardClient({ stats, initialUsers }: Props) {
   const [bottlesMin, setBottlesMin] = useState<number | undefined>();
   const [gender, setGender] = useState<"All" | "male" | "female" | "nonbinary">("All");
 
+  const [minAge, setMinAge] = useState<number | undefined>();
+  const [maxAge, setMaxAge] = useState<number | undefined>();
+  const [city, setCity] = useState("");
+
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [mounted, setMounted] = useState(false);
@@ -51,16 +55,29 @@ export function DashboardClient({ stats, initialUsers }: Props) {
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
       const q = searchQuery.toLowerCase().trim();
-      const matchesSearch = !q || [u.name, u.email, u.id, u.fullId].some((field) =>
+      const matchesSearch = !q || [u.name, u.email, u.id, u.fullId, u.city].some((field) =>
         field?.toLowerCase().includes(q),
       );
       const matchesType = filterType === "All" || u.type === filterType;
       const matchesGender = gender === "All" || u.gender === gender;
       const matchesBottles =
         bottlesMin === undefined || u.bottles >= bottlesMin;
-      return matchesSearch && matchesType && matchesGender && matchesBottles;
+
+      const meetsMinAge = minAge !== undefined ? (u.age ?? 0) >= minAge : true;
+      const meetsMaxAge = maxAge !== undefined ? (u.age ?? 0) <= maxAge : true;
+      const matchesCity = !city || u.city?.toLowerCase().includes(city.toLowerCase());
+
+      return (
+        matchesSearch && 
+        matchesType && 
+        matchesGender && 
+        matchesBottles &&
+        meetsMinAge &&
+        meetsMaxAge &&
+        matchesCity
+      );
     });
-  }, [searchQuery, users, filterType, gender, bottlesMin]);
+  }, [searchQuery, users, filterType, gender, bottlesMin, minAge, maxAge, city]);
 
   function exportCsv() {
     const header = [
@@ -226,6 +243,12 @@ export function DashboardClient({ stats, initialUsers }: Props) {
             setGender={setGender}
             bottlesMin={bottlesMin}
             setBottlesMin={setBottlesMin}
+            minAge={minAge}
+            setMinAge={setMinAge}
+            maxAge={maxAge}
+            setMaxAge={setMaxAge}
+            city={city}
+            setCity={setCity}
           />
 
           <UserProfileSheet
