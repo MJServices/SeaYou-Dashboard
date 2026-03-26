@@ -18,6 +18,8 @@ export type UserRow = {
   gender?: string | null;
   age?: number | null;
   city?: string | null;
+  department?: string | null;
+  createdAt: Date;
   fullId: string;
 };
 
@@ -63,6 +65,9 @@ export function UserTable({
                 {t("emailAddress")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
+                {t("createdAt")}
+              </TableHead>
+              <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
                 {t("lastActive")}
               </TableHead>
               <TableHead className="text-[#737373] sticky top-0 z-10 bg-[#f5f5f5]">
@@ -93,6 +98,13 @@ export function UserTable({
                   <span className="underline hover:text-[#737373]">
                     {r.email}
                   </span>
+                </TableCell>
+                <TableCell className="text-[16px] font-medium text-[#363636]">
+                  {format.dateTime(r.createdAt, {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                  })}
                 </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
                   {format.relativeTime(r.lastActive)}
@@ -132,6 +144,9 @@ export function UserTable({
                   <div className="text-[14px] text-[#737373]">{r.id}</div>
                   <div className="text-[14px] text-[#737373]">
                     {format.relativeTime(r.lastActive)}
+                  </div>
+                  <div className="text-[14px] text-[#737373]">
+                    {format.dateTime(r.createdAt, { dateStyle: 'short' })}
                   </div>
                   <div className="text-[14px] font-medium text-[#e11d48]">
                     {getGenderLabel(r.gender)}

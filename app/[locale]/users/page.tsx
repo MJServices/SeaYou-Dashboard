@@ -43,6 +43,8 @@ export default async function UsersPage() {
         gender: user.gender,
         age: user.age,
         city: user.city,
+        department: user.department,
+        createdAt: user.created_at ? new Date(user.created_at) : new Date(),
         fullId: user.id,
       })) || [];
 

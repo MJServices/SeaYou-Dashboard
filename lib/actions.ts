@@ -10,6 +10,28 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Use service role key if available for administrative tasks
 const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
 
+export async function blockUserAction(userId: string) {
+  if (!supabaseServiceKey) {
+    return { success: false, error: "Service role key missing. Administrative blocking not possible." };
+  }
+
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_active: false })
+      .eq("id", userId);
+
+    if (error) throw error;
+
+    revalidatePath("/[locale]/users", "page");
+    revalidatePath("/[locale]", "page");
+    
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function deleteUserAction(userId: string) {
   if (!supabaseServiceKey) {
     return { success: false, error: "Service role key missing. Administrative deletion not possible." };

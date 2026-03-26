@@ -31,10 +31,13 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   const [from, setFrom] = useState<Date | undefined>();
   const [to, setTo] = useState<Date | undefined>();
   const [bottlesMin, setBottlesMin] = useState<number | undefined>();
-  const [gender, setGender] = useState<"All" | "male" | "female" | "nonbinary">("All");
+  const [gender, setGender] = useState<string[]>([]);
   const [minAge, setMinAge] = useState<number | undefined>();
   const [maxAge, setMaxAge] = useState<number | undefined>();
   const [city, setCity] = useState("");
+  const [department, setDepartment] = useState("");
+  const [sortBy, setSortBy] = useState<"none" | "gender" | "age" | "department" | "createdAt">("none");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [exportOpen, setExportOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -48,13 +51,13 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
   const t = useTranslations("Users");
 
   const filtered = useMemo(() => {
-    return users.filter((r) => {
+    let filteredList = users.filter((r) => {
       const q = query.toLowerCase().trim();
       const matchesQuery = !q || [r.id, r.name, r.email, r.fullId, r.city].some((s) =>
         s?.toLowerCase().includes(q),
       );
       const matchesType = type === "All" ? true : r.type === type;
-      const matchesGender = gender === "All" ? true : r.gender === gender;
+      const matchesGender = gender.length === 0 ? true : (r.gender && gender.includes(r.gender));
       const afterFrom = from ? r.lastActive >= from : true;
       const beforeTo = to ? r.lastActive <= to : true;
       const meetsBottles =
@@ -63,6 +66,7 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
       const meetsMinAge = minAge !== undefined ? (r.age ?? 0) >= minAge : true;
       const meetsMaxAge = maxAge !== undefined ? (r.age ?? 0) <= maxAge : true;
       const matchesCity = !city || r.city?.toLowerCase().includes(city.toLowerCase());
+      const matchesDept = !department || r.department?.toLowerCase().includes(department.toLowerCase());
 
       return (
         matchesQuery && 
@@ -73,32 +77,54 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
         meetsBottles &&
         meetsMinAge &&
         meetsMaxAge &&
-        matchesCity
+        matchesCity &&
+        matchesDept
       );
     });
-  }, [query, type, gender, from, to, bottlesMin, minAge, maxAge, city, users]);
+    
+    // Sort
+    if (sortBy !== "none") {
+      filteredList.sort((a: UserRow, b: UserRow) => {
+        let cmp = 0;
+        if (sortBy === "age") {
+          cmp = (a.age ?? 0) - (b.age ?? 0);
+        } else if (sortBy === "gender") {
+          cmp = (a.gender || "").localeCompare(b.gender || "");
+        } else if (sortBy === "department") {
+          cmp = (a.department || "").localeCompare(b.department || "");
+        } else if (sortBy === "createdAt") {
+          cmp = a.createdAt.getTime() - b.createdAt.getTime();
+        }
+        return sortDir === "asc" ? cmp : -cmp;
+      });
+    }
+    
+    return filteredList;
+  }, [query, type, gender, from, to, bottlesMin, minAge, maxAge, city, department, sortBy, sortDir, users]);
 
   function exportCsv() {
     const header = [
       t("idNumber"),
       t("name"),
       t("emailAddress"),
+      t("createdAt"),
       t("lastActive"),
       t("bottlesSent"),
       t("gender"),
       t("type"),
     ];
-    const rows = filtered.map((r) => [
+    const rows = filtered.map((r: UserRow) => [
       r.id,
       r.name,
       r.email,
+      r.createdAt.toISOString(),
       r.lastActive.toISOString(),
       String(r.bottles),
       r.gender || "-",
       r.type === "Basic" ? t("basic") : t("premium"),
     ]);
     const csv = [header, ...rows]
-      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .map((row) => row.map((cell: any) => `"${cell}"`).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -252,6 +278,12 @@ export function UsersClient({ initialUsers }: { initialUsers: UserRow[] }) {
             setMaxAge={setMaxAge}
             city={city}
             setCity={setCity}
+            department={department}
+            setDepartment={setDepartment}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortDir={sortDir}
+            setSortDir={setSortDir}
           />
           <UserProfileSheet
             key={selectedUserEmail || "empty"}

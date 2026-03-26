@@ -36,11 +36,13 @@ export function DashboardClient({ stats, initialUsers }: Props) {
     "All",
   );
   const [bottlesMin, setBottlesMin] = useState<number | undefined>();
-  const [gender, setGender] = useState<"All" | "male" | "female" | "nonbinary">("All");
-
+  const [gender, setGender] = useState<string[]>([]);
   const [minAge, setMinAge] = useState<number | undefined>();
   const [maxAge, setMaxAge] = useState<number | undefined>();
   const [city, setCity] = useState("");
+  const [department, setDepartment] = useState("");
+  const [sortBy, setSortBy] = useState<"none" | "gender" | "age" | "department" | "createdAt">("none");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
@@ -53,19 +55,20 @@ export function DashboardClient({ stats, initialUsers }: Props) {
   }, []);
 
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
+    let filteredList = users.filter((u) => {
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch = !q || [u.name, u.email, u.id, u.fullId, u.city].some((field) =>
         field?.toLowerCase().includes(q),
       );
       const matchesType = filterType === "All" || u.type === filterType;
-      const matchesGender = gender === "All" || u.gender === gender;
+      const matchesGender = gender.length === 0 ? true : (u.gender && gender.includes(u.gender));
       const matchesBottles =
         bottlesMin === undefined || u.bottles >= bottlesMin;
 
       const meetsMinAge = minAge !== undefined ? (u.age ?? 0) >= minAge : true;
       const meetsMaxAge = maxAge !== undefined ? (u.age ?? 0) <= maxAge : true;
       const matchesCity = !city || u.city?.toLowerCase().includes(city.toLowerCase());
+      const matchesDept = !department || u.department?.toLowerCase().includes(department.toLowerCase());
 
       return (
         matchesSearch && 
@@ -74,32 +77,54 @@ export function DashboardClient({ stats, initialUsers }: Props) {
         matchesBottles &&
         meetsMinAge &&
         meetsMaxAge &&
-        matchesCity
+        matchesCity &&
+        matchesDept
       );
     });
-  }, [searchQuery, users, filterType, gender, bottlesMin, minAge, maxAge, city]);
+    
+    // Sort
+    if (sortBy !== "none") {
+      filteredList.sort((a: UserRow, b: UserRow) => {
+        let cmp = 0;
+        if (sortBy === "age") {
+          cmp = (a.age ?? 0) - (b.age ?? 0);
+        } else if (sortBy === "gender") {
+          cmp = (a.gender || "").localeCompare(b.gender || "");
+        } else if (sortBy === "department") {
+          cmp = (a.department || "").localeCompare(b.department || "");
+        } else if (sortBy === "createdAt") {
+          cmp = a.createdAt.getTime() - b.createdAt.getTime();
+        }
+        return sortDir === "asc" ? cmp : -cmp;
+      });
+    }
+    
+    return filteredList;
+  }, [searchQuery, users, filterType, gender, bottlesMin, minAge, maxAge, city, department, sortBy, sortDir]);
 
   function exportCsv() {
     const header = [
       "ID Number",
       "Name",
       "Email Address",
+      "Created At",
       "Last Active",
       "Bottles Sent",
       "Gender",
       "Type",
     ];
-    const rows = filteredUsers.map((r) => [
+    const rows = filteredUsers.map((r: UserRow) => [
       r.id,
       r.name,
       r.email,
+      r.createdAt.toISOString(),
       r.lastActive.toISOString(),
       String(r.bottles),
       r.gender || "-",
       r.type,
     ]);
     const csv = [header, ...rows]
-      .map((row) => row.map((cell) => `"${cell}"`).join(","))
+      .map((row) => row.map((cell: any) => `"${cell}"`).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -249,6 +274,12 @@ export function DashboardClient({ stats, initialUsers }: Props) {
             setMaxAge={setMaxAge}
             city={city}
             setCity={setCity}
+            department={department}
+            setDepartment={setDepartment}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortDir={sortDir}
+            setSortDir={setSortDir}
           />
 
           <UserProfileSheet

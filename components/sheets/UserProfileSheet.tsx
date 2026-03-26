@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteUserAction } from "@/lib/actions";
+import { deleteUserAction, blockUserAction } from "@/lib/actions";
 import {
   Sheet,
   SheetContent,
@@ -56,7 +56,9 @@ export function UserProfileSheet({
   const [profile, setProfile] = useState<ProfileDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [isBlocking, setIsBlocking] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showConfirmBlock, setShowConfirmBlock] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const t = useTranslations("Profile");
@@ -115,24 +117,43 @@ export function UserProfileSheet({
   async function handleBlockUser() {
     if (!profile) return;
     
-    setIsDeleting(true);
-    setShowConfirm(false);
-    console.log(`Front-end: Calling deleteUserAction for profile.id: ${profile.id}`);
+    setIsBlocking(true);
+    setShowConfirmBlock(false);
     try {
-      const result = await deleteUserAction(profile.id);
-      console.log("Front-end: deleteUserAction result:", result);
-
+      const result = await blockUserAction(profile.id);
       if (!result.success) throw new Error(result.error);
 
       alert(t("blockSuccess"));
+      // update local profile state so UI reflects it's blocked immediately if needed
+      setProfile({ ...profile, is_active: false });
+      router.refresh();
+    } catch (err: any) {
+      console.error("Erreur lors du blocage de l'utilisateur:", err);
+      alert(err.message || t("error"));
+    } finally {
+      setIsBlocking(false);
+    }
+  }
+
+  async function handleDeleteUser() {
+    if (!profile) return;
+    
+    setIsDeleting(true);
+    setShowConfirmDelete(false);
+    try {
+      const result = await deleteUserAction(profile.id);
+
+      if (!result.success) throw new Error(result.error);
+
+      alert(t("deleteSuccess"));
       if (onUserDeleted && profile.email) {
         onUserDeleted(profile.email);
       }
       onOpenChange(false);
       router.refresh();
     } catch (err: any) {
-      console.error("Error blocking user:", err);
-      alert(err.message || "Error blocking user");
+      console.error("Erreur lors de la suppression de l'utilisateur:", err);
+      alert(err.message || t("error"));
     } finally {
       setIsDeleting(false);
     }
@@ -201,12 +222,20 @@ export function UserProfileSheet({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      className="text-red-600 font-medium cursor-pointer flex items-center gap-2"
+                      className="text-orange-600 font-medium cursor-pointer flex items-center gap-2"
                       onClick={handleBlockUser}
-                      disabled={isDeleting}
+                      disabled={isBlocking || isDeleting || profile.is_active === false}
+                    >
+                      {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {profile.is_active === false ? t("blocked") : t("blockUser")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600 font-medium cursor-pointer flex items-center gap-2"
+                      onClick={handleDeleteUser}
+                      disabled={isBlocking || isDeleting}
                     >
                       {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {t("blockUser")}
+                      {t("deleteUser")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -236,17 +265,18 @@ export function UserProfileSheet({
               </div>
 
               {/* Status Actions */}
-              <div className="flex justify-end pr-4 py-2 border-b border-gray-50 bg-gray-50/50 rounded-lg mx-6">
-                <div className="flex items-center gap-3">
-                  {!showConfirm ? (
+              <div className="flex justify-end pr-4 py-3 border-b border-gray-50 bg-gray-50/50 rounded-lg mx-6">
+                <div className="flex items-center gap-4">
+                  {/* Block Section */}
+                  {!showConfirmBlock ? (
                     <Button
                       variant="ghost"
-                      className="text-red-500 font-bold hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
-                      onClick={() => setShowConfirm(true)}
-                      disabled={isDeleting}
+                      className="text-orange-500 font-bold hover:bg-orange-50 hover:text-orange-600 flex items-center gap-2"
+                      onClick={() => setShowConfirmBlock(true)}
+                      disabled={isBlocking || isDeleting || profile.is_active === false}
                     >
-                      {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {t("blockUser")}
+                      {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {profile.is_active === false ? t("blocked") : t("blockUser")}
                     </Button>
                   ) : (
                     <div className="flex items-center gap-2 scale-in-center">
@@ -254,7 +284,47 @@ export function UserProfileSheet({
                         variant="ghost"
                         size="sm"
                         className="text-gray-500 font-medium hover:bg-gray-100"
-                        onClick={() => setShowConfirm(false)}
+                        onClick={() => setShowConfirmBlock(false)}
+                        disabled={isBlocking}
+                      >
+                        {t("cancel")}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="font-bold flex items-center gap-2 shadow-sm bg-orange-500 hover:bg-orange-600"
+                        onClick={handleBlockUser}
+                        disabled={isBlocking}
+                      >
+                        {isBlocking ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <span className="text-[12px]">{t("confirmBlock")}</span>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="w-px h-6 bg-gray-200"></div>
+
+                  {/* Delete Section */}
+                  {!showConfirmDelete ? (
+                    <Button
+                      variant="ghost"
+                      className="text-red-500 font-bold hover:bg-red-50 hover:text-red-600 flex items-center gap-2"
+                      onClick={() => setShowConfirmDelete(true)}
+                      disabled={isBlocking || isDeleting}
+                    >
+                      {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {t("deleteUser")}
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2 scale-in-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-500 font-medium hover:bg-gray-100"
+                        onClick={() => setShowConfirmDelete(false)}
                         disabled={isDeleting}
                       >
                         {t("cancel")}
@@ -263,7 +333,7 @@ export function UserProfileSheet({
                         variant="destructive"
                         size="sm"
                         className="font-bold flex items-center gap-2 shadow-sm"
-                        onClick={handleBlockUser}
+                        onClick={handleDeleteUser}
                         disabled={isDeleting}
                       >
                         {isDeleting ? (
@@ -315,7 +385,7 @@ export function UserProfileSheet({
                 {profile.secret_audio_url ? (
                   <audio controls className="w-full h-10 mt-1">
                     <source src={profile.secret_audio_url} type="audio/mpeg" />
-                    Your browser does not support the audio element.
+                    Votre navigateur ne prend pas en charge l'élément audio.
                   </audio>
                 ) : (
                   <p className="text-[18px] font-semibold text-gray-400 italic">
