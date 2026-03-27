@@ -47,6 +47,7 @@
   "Header": {
     "menu": "Menu",
     "collapse": "Collapse",
+    "expand": "Expand",
     "searchPlaceholder": "Search for anything"
   },
   "Filters": {
@@ -92,10 +93,14 @@
     "notSpecified": "Not specified",
     "na": "N/A",
     "blockSuccess": "User blocked successfully.",
+    "unblockSuccess": "User unblocked successfully.",
     "deleteSuccess": "User deleted successfully.",
     "cancel": "Cancel",
     "blockUser": "Block User",
+    "unblockUser": "Unblock User",
     "deleteUser": "Delete User",
+    "confirmBlock": "Confirm Blocking",
+    "confirmUnblock": "Confirm Unblocking",
     "confirmDelete": "Confirm Deletion",
     "error": "An error occurred",
     "blocked": "Blocked"
@@ -116,24 +121,24 @@
   "Shell": {
     "dashboard": "Dashboard",
     "users": "Users",
-    "fantasies": "Fantasies",
-    "naughtyQuestions": "Naughty Questions"
+    "fantasies": "Fantasmes",
+    "naughtyQuestions": "Questions coquines"
   },
   "Fantasies": {
     "title": "Fantasies",
     "user": "User",
     "text": "Text",
-    "status": "Status",
-    "createdAt": "Created At",
-    "notFound": "No fantasies found."
+    "status": "Statut",
+    "createdAt": "Créé le",
+    "notFound": "Aucun fantasme trouvé."
   },
   "NaughtyQuestions": {
     "title": "Naughty Questions",
-    "order": "Order",
-    "category": "Category",
-    "label": "Label",
+    "order": "Ordre",
+    "category": "Catégorie",
+    "label": "Étiquette",
     "question": "Question",
-    "status": "Status",
-    "notFound": "No questions found."
+    "status": "Statut",
+    "notFound": "Aucune question trouvée."
   }
 }

@@ -70,14 +70,14 @@ export function Sidebar({
                   height={24}
                 />
                 <span className="text-[#363636] text-lg font-semibold">
-                  SeaYou Admin
+                  {t("admin")}
                 </span>
               </div>
               <button
                 className="rounded-lg border border-[#d9d9d9] px-3 py-1 text-[#363636]"
                 onClick={onClose}
               >
-                Close
+                {t("close")}
               </button>
             </div>
             <nav className="px-2 py-2">

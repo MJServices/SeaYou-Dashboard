@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteUserAction, blockUserAction } from "@/lib/actions";
+import { deleteUserAction, blockUserAction, unblockUserAction } from "@/lib/actions";
 import {
   Sheet,
   SheetContent,
@@ -59,6 +59,7 @@ export function UserProfileSheet({
   const [isBlocking, setIsBlocking] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showConfirmBlock, setShowConfirmBlock] = useState(false);
+  const [showConfirmUnblock, setShowConfirmUnblock] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const t = useTranslations("Profile");
@@ -129,6 +130,26 @@ export function UserProfileSheet({
       router.refresh();
     } catch (err: any) {
       console.error("Erreur lors du blocage de l'utilisateur:", err);
+      alert(err.message || t("error"));
+    } finally {
+      setIsBlocking(false);
+    }
+  }
+
+  async function handleUnblockUser() {
+    if (!profile) return;
+    
+    setIsBlocking(true);
+    setShowConfirmUnblock(false);
+    try {
+      const result = await unblockUserAction(profile.id);
+      if (!result.success) throw new Error(result.error);
+
+      alert(t("unblockSuccess"));
+      setProfile({ ...profile, is_active: true });
+      router.refresh();
+    } catch (err: any) {
+      console.error("Erreur lors du déblocage de l'utilisateur:", err);
       alert(err.message || t("error"));
     } finally {
       setIsBlocking(false);
@@ -223,11 +244,11 @@ export function UserProfileSheet({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       className="text-orange-600 font-medium cursor-pointer flex items-center gap-2"
-                      onClick={handleBlockUser}
-                      disabled={isBlocking || isDeleting || profile.is_active === false}
+                      onClick={profile.is_active === false ? handleUnblockUser : handleBlockUser}
+                      disabled={isBlocking || isDeleting}
                     >
                       {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {profile.is_active === false ? t("blocked") : t("blockUser")}
+                      {profile.is_active === false ? t("unblockUser") : t("blockUser")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600 font-medium cursor-pointer flex items-center gap-2"
@@ -267,42 +288,81 @@ export function UserProfileSheet({
               {/* Status Actions */}
               <div className="flex justify-end pr-4 py-3 border-b border-gray-50 bg-gray-50/50 rounded-lg mx-6">
                 <div className="flex items-center gap-4">
-                  {/* Block Section */}
-                  {!showConfirmBlock ? (
-                    <Button
-                      variant="ghost"
-                      className="text-orange-500 font-bold hover:bg-orange-50 hover:text-orange-600 flex items-center gap-2"
-                      onClick={() => setShowConfirmBlock(true)}
-                      disabled={isBlocking || isDeleting || profile.is_active === false}
-                    >
-                      {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {profile.is_active === false ? t("blocked") : t("blockUser")}
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-2 scale-in-center">
+                  {/* Block/Unblock Section */}
+                  {profile.is_active !== false ? (
+                    !showConfirmBlock ? (
                       <Button
                         variant="ghost"
-                        size="sm"
-                        className="text-gray-500 font-medium hover:bg-gray-100"
-                        onClick={() => setShowConfirmBlock(false)}
-                        disabled={isBlocking}
+                        className="text-orange-500 font-bold hover:bg-orange-50 hover:text-orange-600 flex items-center gap-2"
+                        onClick={() => setShowConfirmBlock(true)}
+                        disabled={isBlocking || isDeleting}
                       >
-                        {t("cancel")}
+                        {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {t("blockUser")}
                       </Button>
+                    ) : (
+                      <div className="flex items-center gap-2 scale-in-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-500 font-medium hover:bg-gray-100"
+                          onClick={() => setShowConfirmBlock(false)}
+                          disabled={isBlocking}
+                        >
+                          {t("cancel")}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="font-bold flex items-center gap-2 shadow-sm bg-orange-500 hover:bg-orange-600"
+                          onClick={handleBlockUser}
+                          disabled={isBlocking}
+                        >
+                          {isBlocking ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <span className="text-[12px]">{t("confirmBlock")}</span>
+                          )}
+                        </Button>
+                      </div>
+                    )
+                  ) : (
+                    !showConfirmUnblock ? (
                       <Button
-                        variant="destructive"
-                        size="sm"
-                        className="font-bold flex items-center gap-2 shadow-sm bg-orange-500 hover:bg-orange-600"
-                        onClick={handleBlockUser}
-                        disabled={isBlocking}
+                        variant="ghost"
+                        className="text-green-600 font-bold hover:bg-green-50 hover:text-green-700 flex items-center gap-2"
+                        onClick={() => setShowConfirmUnblock(true)}
+                        disabled={isBlocking || isDeleting}
                       >
-                        {isBlocking ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <span className="text-[12px]">{t("confirmBlock")}</span>
-                        )}
+                        {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {t("unblockUser")}
                       </Button>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-2 scale-in-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-500 font-medium hover:bg-gray-100"
+                          onClick={() => setShowConfirmUnblock(false)}
+                          disabled={isBlocking}
+                        >
+                          {t("cancel")}
+                        </Button>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="font-bold flex items-center gap-2 shadow-sm bg-green-600 hover:bg-green-700"
+                          onClick={handleUnblockUser}
+                          disabled={isBlocking}
+                        >
+                          {isBlocking ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <span className="text-[12px]">{t("confirmUnblock")}</span>
+                          )}
+                        </Button>
+                      </div>
+                    )
                   )}
 
                   <div className="w-px h-6 bg-gray-200"></div>
