@@ -63,6 +63,28 @@ export function UserProfileSheet({
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const t = useTranslations("Profile");
+  const vt = useTranslations("Values");
+
+  const translateValue = (val: string | null | undefined) => {
+    if (!val) return t("notSpecified");
+    
+    // Handle comma-separated lists (common in DB for multi-choice fields)
+    if (val.includes(",")) {
+      return val
+        .split(",")
+        .map((part) => {
+          const trimmed = part.trim();
+          return vt.has(trimmed) ? vt(trimmed) : trimmed;
+        })
+        .join(", ");
+    }
+
+    // Only translate if the key exists in our Values dictionary
+    if (vt.has(val)) {
+      return vt(val);
+    }
+    return val;
+  };
 
   useEffect(() => {
     if (open && userEmail) {
@@ -407,23 +429,21 @@ export function UserProfileSheet({
                 </div>
               </div>
 
-              {/* Looking for */}
               <div className="space-y-2">
                 <h3 className="text-[14px] font-bold text-gray-400">
                   {t("lookingFor")}
                 </h3>
                 <p className="text-[18px] font-semibold">
-                  {profile.expectation || t("notSpecified")}
+                  {translateValue(profile.expectation)}
                 </p>
               </div>
 
-              {/* Fantasy */}
               <div className="space-y-2">
                 <h3 className="text-[14px] font-bold text-gray-400">
                   {t("fantasy")}
                 </h3>
                 <p className="text-[18px] font-semibold">
-                  {profile.secret_desire || t("notSpecified")}
+                  {translateValue(profile.secret_desire)}
                 </p>
               </div>
 
@@ -497,7 +517,7 @@ export function UserProfileSheet({
                 </h3>
                 <div className="flex flex-wrap gap-4 text-[16px] font-semibold text-[#363636]">
                   {profile.sexual_orientation?.length
-                    ? profile.sexual_orientation.join("  ·  ")
+                    ? profile.sexual_orientation.map(so => translateValue(so)).join("  ·  ")
                     : t("notSpecified")}
                 </div>
               </div>
@@ -514,7 +534,7 @@ export function UserProfileSheet({
                         key={interest}
                         className="px-4 py-2 bg-[#00BCD4] text-white rounded-full text-[14px] font-semibold"
                       >
-                        {interest}
+                        {translateValue(interest)}
                       </span>
                     ))
                   ) : (

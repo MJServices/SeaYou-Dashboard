@@ -140,5 +140,33 @@
     "question": "Question",
     "status": "Statut",
     "notFound": "Aucune question trouvée."
+  },
+  "Values": {
+    "A serious relationship": "A serious relationship",
+    "A casual relationship": "A casual relationship",
+    "Nothing serious": "Nothing serious",
+    "Not sure yet": "Not sure yet",
+    "I do not really know yet": "I do not really know yet",
+    "New friends": "New friends",
+    "To make friends": "To make friends",
+    "Heterosexual": "Heterosexual",
+    "Bisexual": "Bisexual",
+    "Gay": "Gay",
+    "Lesbian": "Lesbian",
+    "Queer": "Queer",
+    "Asexual": "Asexual",
+    "Demisexual": "Demisexual",
+    "Pansexual": "Pansexual",
+    "Spontaneous weekends": "Spontaneous weekends",
+    "Fitness": "Fitness",
+    "Cooking": "Cooking",
+    "Traveling": "Traveling",
+    "Music": "Music",
+    "Movies": "Movies",
+    "Reading": "Reading",
+    "Gaming": "Gaming",
+    "Photography": "Photography",
+    "Art": "Art",
+    "Nature": "Nature"
   }
 }
