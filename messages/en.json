@@ -80,6 +80,7 @@
     "voiceMessage": "Voice Message",
     "age": "Age",
     "city": "City",
+    "department": "Department",
     "bottlesReceived": "Bottles Received",
     "bottlesSent": "Bottles Sent",
     "sexualOrientation": "Sexual Orientation",

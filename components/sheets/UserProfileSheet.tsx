@@ -28,6 +28,7 @@ type ProfileDetails = {
   email: string;
   age: number | null;
   city: string | null;
+  department: string | null;
   about: string | null;
   expectation: string | null;
   interests: string[] | null;
@@ -490,6 +491,14 @@ export function UserProfileSheet({
                   </h3>
                   <p className="text-[18px] font-semibold">
                     {profile.city || t("na")}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-[14px] font-bold text-gray-400">
+                    {t("department")}
+                  </h3>
+                  <p className="text-[18px] font-semibold">
+                    {profile.department || t("na")}
                   </p>
                 </div>
                 <div className="space-y-1">
