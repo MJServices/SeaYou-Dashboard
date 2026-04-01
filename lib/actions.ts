@@ -34,7 +34,7 @@ export async function blockUserAction(userId: string) {
     // 3. Update DB profile for UI list filtering
     const { error } = await supabase
       .from("profiles")
-      .update({ is_active: false })
+      .update({ is_active: false, is_blocked: true })
       .eq("id", userId);
 
     if (error) throw error;
@@ -58,7 +58,7 @@ export async function unblockUserAction(userId: string) {
     // 1. Remove ban in Auth
     const { error: authError } = await supabase.auth.admin.updateUserById(
       userId,
-      { ban_duration: '0s' } 
+      { ban_duration: 'none' } 
     );
 
     if (authError) throw authError;
@@ -66,7 +66,7 @@ export async function unblockUserAction(userId: string) {
     // 2. Update DB profile
     const { error } = await supabase
       .from("profiles")
-      .update({ is_active: true })
+      .update({ is_active: true, is_blocked: false })
       .eq("id", userId);
 
     if (error) throw error;

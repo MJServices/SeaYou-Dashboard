@@ -107,7 +107,7 @@ export function UserTable({
                   })}
                 </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
-                  {format.relativeTime(r.lastActive)}
+                  {format.relativeTime(r.lastActive, new Date())}
                 </TableCell>
                 <TableCell className="text-[16px] font-medium text-[#363636]">
                   {r.bottles}
@@ -143,7 +143,7 @@ export function UserTable({
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div className="text-[14px] text-[#737373]">{r.id}</div>
                   <div className="text-[14px] text-[#737373]">
-                    {format.relativeTime(r.lastActive)}
+                    {format.relativeTime(r.lastActive, new Date())}
                   </div>
                   <div className="text-[14px] text-[#737373]">
                     {format.dateTime(r.createdAt, { dateStyle: 'short' })}

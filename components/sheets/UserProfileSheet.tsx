@@ -40,6 +40,7 @@ type ProfileDetails = {
   secret_desire: string | null;
   secret_audio_url: string | null;
   is_active: boolean;
+  is_blocked: boolean;
   photos?: string[];
 };
 
@@ -149,7 +150,7 @@ export function UserProfileSheet({
 
       alert(t("blockSuccess"));
       // update local profile state so UI reflects it's blocked immediately if needed
-      setProfile({ ...profile, is_active: false });
+      setProfile({ ...profile, is_active: false, is_blocked: true });
       router.refresh();
     } catch (err: any) {
       console.error("Erreur lors du blocage de l'utilisateur:", err);
@@ -169,7 +170,7 @@ export function UserProfileSheet({
       if (!result.success) throw new Error(result.error);
 
       alert(t("unblockSuccess"));
-      setProfile({ ...profile, is_active: true });
+      setProfile({ ...profile, is_active: true, is_blocked: false });
       router.refresh();
     } catch (err: any) {
       console.error("Erreur lors du déblocage de l'utilisateur:", err);
@@ -267,11 +268,11 @@ export function UserProfileSheet({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       className="text-orange-600 font-medium cursor-pointer flex items-center gap-2"
-                      onClick={profile.is_active === false ? handleUnblockUser : handleBlockUser}
+                      onClick={profile.is_blocked ? handleUnblockUser : handleBlockUser}
                       disabled={isBlocking || isDeleting}
                     >
                       {isBlocking && <Loader2 className="w-4 h-4 animate-spin" />}
-                      {profile.is_active === false ? t("unblockUser") : t("blockUser")}
+                      {profile.is_blocked ? t("unblockUser") : t("blockUser")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600 font-medium cursor-pointer flex items-center gap-2"
@@ -312,7 +313,7 @@ export function UserProfileSheet({
               <div className="flex justify-end pr-4 py-3 border-b border-gray-50 bg-gray-50/50 rounded-lg mx-6">
                 <div className="flex items-center gap-4">
                   {/* Block/Unblock Section */}
-                  {profile.is_active !== false ? (
+                  {!profile.is_blocked ? (
                     !showConfirmBlock ? (
                       <Button
                         variant="ghost"

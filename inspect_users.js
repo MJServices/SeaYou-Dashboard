@@ -19,7 +19,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function inspect() {
   const { data: profiles, error } = await supabase
     .from('profiles')
-    .select('id, full_name, gender, birth_year, age, role');
+    .select('id, full_name, email, last_active, created_at');
 
   if (error) {
     console.error('Error fetching profiles:', error);
