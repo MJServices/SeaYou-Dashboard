@@ -113,12 +113,24 @@ export function UserProfileSheet({
       if (profiles && profiles.length > 0) {
         const p = profiles[0] as any;
 
-        // Fetch real photos from storage
-        const { data: files, error: sError } = await supabase.storage
-          .from("face_photos")
-          .list(p.id);
-
-        if (sError) console.error("Storage error:", sError);
+        // Fetch accurate bottle counts and photos in parallel
+        const [
+          { count: sentCount },
+          { count: receivedCount },
+          { data: files }
+        ] = await Promise.all([
+          supabase
+            .from("sent_bottles")
+            .select("*", { count: "exact", head: true })
+            .eq("sender_id", p.id),
+          supabase
+            .from("received_bottles")
+            .select("*", { count: "exact", head: true })
+            .eq("receiver_id", p.id),
+          supabase.storage
+            .from("face_photos")
+            .list(p.id)
+        ]);
 
         const photos = files
           ? files.map(
@@ -127,7 +139,12 @@ export function UserProfileSheet({
             )
           : [];
 
-        setProfile({ ...p, photos });
+        setProfile({ 
+          ...p, 
+          photos,
+          total_bottles_sent: sentCount ?? p.total_bottles_sent,
+          total_bottles_received: receivedCount ?? p.total_bottles_received
+        });
       } else {
         setError(t("notFound"));
       }
