@@ -245,5 +245,18 @@
     "Going out unexpected": "Sortie imprévue",
     "Spontaneous outing": "Sortie imprévue",
     "Sortie imprévue": "Sortie imprévue"
+  },
+  "Login": {
+    "title": "Connexion à SeaYou",
+    "subtitle": "Portail d'Administration",
+    "emailLabel": "Adresse Email",
+    "emailPlaceholder": "Entrez votre email admin",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "button": "Se connecter",
+    "buttonLoading": "Connexion...",
+    "errorInvalid": "Mot de passe incorrect ou erreur de connexion.",
+    "errorUnauthorized": "Accès refusé : cet email n'est pas autorisé.",
+    "errorRequired": "Veuillez remplir tous les champs."
   }
 }

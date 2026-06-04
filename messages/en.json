@@ -205,5 +205,18 @@
     "Drink on a terrace": "Drink on a terrace",
     "Fine dining": "Fine dining",
     "Spontaneous outing": "Spontaneous outing"
+  },
+  "Login": {
+    "title": "Sign in to SeaYou",
+    "subtitle": "Admin Dashboard Portal",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "Enter your admin email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "button": "Sign In",
+    "buttonLoading": "Signing In...",
+    "errorInvalid": "Invalid password or connection error.",
+    "errorUnauthorized": "Access Denied: This email address is not authorized.",
+    "errorRequired": "Please fill in all fields."
   }
 }
