@@ -3,12 +3,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-// Use service role key if available for administrative tasks
-const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+let client: any = null;
+const supabase = new Proxy({} as any, {
+  get(target, prop) {
+    if (!client) {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
+      client = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+    }
+    return client[prop];
+  }
+});
 
 export async function blockUserAction(userId: string) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -27,7 +33,7 @@ export async function blockUserAction(userId: string) {
 
     // 2. Global Sign Out (terminates current sessions immediately)
     // Note: Some versions of supabase-js support admin.signOut(userId, scope)
-    await supabase.auth.admin.signOut(userId, 'global').catch(e => {
+    await supabase.auth.admin.signOut(userId, 'global').catch((e: any) => {
         console.warn("Global sign out failed or unsupported, ban will take effect on next refresh:", e);
     });
 

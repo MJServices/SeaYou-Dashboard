@@ -4,14 +4,35 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { signSession } from "./session";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+let client: any = null;
+let adminClient: any = null;
 
-const ALLOWED_EMAILS = ["contact@seayou-app.com", "minhaj.freelancerr@gmail.com"];
+const supabase = new Proxy({} as any, {
+  get(target, prop) {
+    if (!client) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
+      client = createClient(url, anonKey);
+    }
+    return client[prop];
+  }
+});
+
+const supabaseAdmin = new Proxy({} as any, {
+  get(target, prop) {
+    if (!adminClient) {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      adminClient = createClient(url, serviceKey || anonKey);
+    }
+    return adminClient[prop];
+  }
+});
+
+const ALLOWED_EMAILS = ["contactpro.seayou@gmail.com", "minhaj.freelancerr@gmail.com"];
 
 export async function loginAction(formData: FormData) {
   const emailInput = formData.get("email") as string;
@@ -33,7 +54,7 @@ export async function loginAction(formData: FormData) {
     if (supabaseServiceKey) {
       const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
       if (!listError && usersData) {
-        const userExists = usersData.users.some(u => u.email === email);
+        const userExists = usersData.users.some((u: any) => u.email === email);
         if (!userExists) {
           // Auto-create user for allowed emails if they don't exist yet
           const { error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -72,7 +93,7 @@ export async function loginAction(formData: FormData) {
     const cookieStore = await cookies();
     cookieStore.set("admin_session", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false to support production builds deployed without HTTPS (e.g. VPS testing)
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24, // 24 hours

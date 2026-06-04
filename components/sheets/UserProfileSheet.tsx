@@ -134,7 +134,7 @@ export function UserProfileSheet({
 
         const photos = files
           ? files.map(
-              (f) =>
+              (f: any) =>
                 `https://nenugkyvcewatuddrwvf.supabase.co/storage/v1/object/public/face_photos/${p.id}/${f.name}`,
             )
           : [];
