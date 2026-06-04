@@ -32,7 +32,7 @@ const supabaseAdmin = new Proxy({} as any, {
   }
 });
 
-const ALLOWED_EMAILS = ["contactpro.seayou@gmail.com", "minhaj.freelancerr@gmail.com"];
+const ALLOWED_EMAILS = ["contact@seayou-app.com", "contactpro.seayou@gmail.com", "minhaj.freelancerr@gmail.com"];
 
 export async function loginAction(formData: FormData) {
   const emailInput = formData.get("email") as string;
