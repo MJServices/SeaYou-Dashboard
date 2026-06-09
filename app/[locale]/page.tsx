@@ -25,21 +25,35 @@ export default async function Home() {
     { data: usersData },
     { data: sentBottlesData },
   ] = await Promise.all([
-    // Current totals/active
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    // Current totals/active — only completed profiles (full_name, gender, age all set)
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null),
+    supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null)
       .lt("created_at", thirtyDaysAgo),
 
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
-      .eq("is_active", true),
+      .eq("is_active", true)
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null),
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
       .eq("is_active", true)
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null)
       .lt("created_at", thirtyDaysAgo),
 
     supabase.from("sent_bottles").select("*", { count: "exact", head: true }),
@@ -51,16 +65,25 @@ export default async function Home() {
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
-      .in("tier", ["premium", "elite"]),
+      .in("tier", ["premium", "elite"])
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null),
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
       .in("tier", ["premium", "elite"])
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null)
       .lt("created_at", thirtyDaysAgo),
 
     supabase
       .from("profiles")
       .select("*")
+      .not("full_name", "is", null)
+      .not("gender", "is", null)
+      .not("age", "is", null)
       .order("created_at", { ascending: false })
       .limit(1000),
     supabase.from("sent_bottles").select("sender_id"),

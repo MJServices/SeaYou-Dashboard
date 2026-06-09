@@ -6,11 +6,13 @@ import { StatCard } from "@/components/cards/StatCard";
 import { UserTable, UserRow } from "@/components/table/UserTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { format, subDays } from "date-fns";
 import { FilterSheet } from "@/components/sheets/FilterSheet";
 import { UserProfileSheet } from "@/components/sheets/UserProfileSheet";
 import { useTranslations } from "next-intl";
+import { supabase } from "@/lib/supabase";
+import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 type DashboardStats = {
   total: { value: number; trend: number };
@@ -47,11 +49,94 @@ export function DashboardClient({ stats, initialUsers }: Props) {
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [mounted, setMounted] = useState(false);
+  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  // Helper: check if a raw profile row has a completed profile
+  function isProfileComplete(user: any): boolean {
+    return !!(user.full_name && user.gender && user.age);
+  }
+
+  // Helper: convert a raw supabase profile row to a UserRow
+  function toUserRow(user: any): UserRow {
+    return {
+      id: user.id.substring(0, 8),
+      name: user.full_name || "Unknown",
+      email: user.email,
+      lastActive: user.last_active ? new Date(user.last_active) : new Date(),
+      bottles: user.total_bottles_sent ?? 0,
+      type: (user.tier === "premium" || user.tier === "elite"
+        ? "Premium"
+        : "Basic") as "Basic" | "Premium",
+      gender: user.gender,
+      age: user.age,
+      city: user.city,
+      department: user.department,
+      createdAt: user.created_at ? new Date(user.created_at) : new Date(),
+      fullId: user.id,
+    };
+  }
 
   useEffect(() => {
     setMounted(true);
     setFromDate(format(subDays(new Date(), 30), "MMM d, yyyy"));
     setToDate(format(new Date(), "MMM d, yyyy"));
+  }, []);
+
+  // Real-time subscription: listen for profile inserts, updates, and deletes
+  useEffect(() => {
+    const channel = supabase
+      .channel("dashboard-profiles-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "profiles" },
+        (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+          const newUser = payload.new as any;
+          // Only add to list if the profile is complete
+          if (!isProfileComplete(newUser)) return;
+          setUsers((prev) => {
+            // Avoid duplicates
+            if (prev.some((u) => u.fullId === newUser.id)) return prev;
+            return [toUserRow(newUser), ...prev];
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles" },
+        (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+          const updated = payload.new as any;
+          setUsers((prev) => {
+            // If profile became incomplete, remove from list
+            if (!isProfileComplete(updated)) {
+              return prev.filter((u) => u.fullId !== updated.id);
+            }
+            // If not in list yet (profile just became complete), add it
+            const exists = prev.some((u) => u.fullId === updated.id);
+            if (!exists) {
+              return [toUserRow(updated), ...prev];
+            }
+            // Update existing entry
+            return prev.map((u) =>
+              u.fullId === updated.id ? toUserRow(updated) : u
+            );
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "profiles" },
+        (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+          const deleted = payload.old as any;
+          setUsers((prev) => prev.filter((u) => u.fullId !== deleted.id));
+        }
+      )
+      .subscribe();
+
+    realtimeChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const filteredUsers = useMemo(() => {
